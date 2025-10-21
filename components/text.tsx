@@ -9,9 +9,10 @@ const textVariants = cva('font-sans text-foreground', {
 			base: 'text-base leading-6',
 			md: 'text-md leading-6',
 			sm: 'text-sm leading-6',
+			xs: 'text-xs leading-6',
 		},
 	},
-	defaultVariants: { variant: 'sm' },
+	defaultVariants: { variant: 'base' },
 });
 
 interface TextProps extends VariantProps<typeof textVariants> {
