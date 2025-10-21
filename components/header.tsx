@@ -1,13 +1,13 @@
 'use client';
 
 import { LogOut, Menu, Search, ShoppingCart, User } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { AccountMenu } from '@/components/account-menu';
 import { Text } from '@/components/text';
 import { ThemeButton } from '@/components/theme/theme-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-
 import { Input } from '@/components/ui/input';
 import {
 	Sheet,
@@ -18,7 +18,13 @@ import {
 } from '@/components/ui/sheet';
 
 export function Header() {
+	const path = usePathname();
+
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+	if (path === '/sign-up') {
+		return null;
+	}
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
