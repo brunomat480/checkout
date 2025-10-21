@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Lato, Montserrat } from 'next/font/google';
 import './globals.css';
+import { ThemeProvider } from '@/components/theme-provider';
 
 const lato = Lato({
 	variable: '--font-lato',
@@ -24,9 +25,21 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="pt-BR">
-			<body className={`${lato.variable} ${montserrat.variable} antialiased`}>
-				{children}
+		<html
+			lang="pt-BR"
+			suppressHydrationWarning
+		>
+			<body
+				className={`${lato.variable} ${montserrat.variable} antialiased font-lato`}
+			>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					enableSystem
+					disableTransitionOnChange
+				>
+					{children}
+				</ThemeProvider>
 			</body>
 		</html>
 	);
