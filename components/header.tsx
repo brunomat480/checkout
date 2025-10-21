@@ -1,28 +1,13 @@
 'use client';
 
-import {
-	ChevronDown,
-	LogOut,
-	Menu,
-	Moon,
-	Search,
-	ShoppingCart,
-	Sun,
-	User,
-} from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { LogOut, Menu, Search, ShoppingCart, User } from 'lucide-react';
 import { useState } from 'react';
+import { AccountMenu } from '@/components/account-menu';
 import { Text } from '@/components/text';
+import { ThemeButton } from '@/components/theme/theme-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+
 import { Input } from '@/components/ui/input';
 import {
 	Sheet,
@@ -33,7 +18,6 @@ import {
 } from '@/components/ui/sheet';
 
 export function Header() {
-	const { setTheme } = useTheme();
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 
 	return (
@@ -47,30 +31,7 @@ export function Header() {
 						</Text>
 					</div>
 					<div className="flex items-center gap-4">
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button
-									variant="ghost"
-									size="sm"
-									className="h-auto p-0 text-muted-foreground hover:text-foreground"
-								>
-									<Sun className="h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-									<Moon className="absolute h-4 w-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-									<span className="sr-only">Toggle theme</span>
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuItem onClick={() => setTheme('light')}>
-									Light
-								</DropdownMenuItem>
-								<DropdownMenuItem onClick={() => setTheme('dark')}>
-									Dark
-								</DropdownMenuItem>
-								<DropdownMenuItem onClick={() => setTheme('system')}>
-									System
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<ThemeButton />
 					</div>
 				</div>
 
@@ -119,32 +80,7 @@ export function Header() {
 									</Button>
 								</div>
 								<div className="border-t pt-4">
-									<Text className="text-sm font-medium mb-2">Tema</Text>
-									<div className="flex flex-col gap-2">
-										<Button
-											variant="ghost"
-											className="justify-start"
-											onClick={() => setTheme('light')}
-										>
-											<Sun className="h-4 w-4 mr-2" />
-											Light
-										</Button>
-										<Button
-											variant="ghost"
-											className="justify-start"
-											onClick={() => setTheme('dark')}
-										>
-											<Moon className="h-4 w-4 mr-2" />
-											Dark
-										</Button>
-										<Button
-											variant="ghost"
-											className="justify-start"
-											onClick={() => setTheme('system')}
-										>
-											System
-										</Button>
-									</div>
+									<ThemeButton />
 								</div>
 								<div className="border-t pt-4">
 									<Button
@@ -195,54 +131,7 @@ export function Header() {
 					</Button>
 
 					<div className="flex items-center gap-1 md:gap-2">
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button
-									variant="ghost"
-									className="hidden md:flex items-center gap-2 px-3"
-								>
-									<User className="h-5 w-5" />
-									<div className="hidden lg:flex flex-col items-start">
-										<span className="text-xs text-muted-foreground">
-											Olá, Bruno
-										</span>
-										<span className="text-sm font-medium flex items-center gap-1">
-											Minha Conta
-											<ChevronDown className="h-3 w-3" />
-										</span>
-									</div>
-								</Button>
-							</DropdownMenuTrigger>
-
-							<DropdownMenuContent
-								align="end"
-								className="w-56"
-							>
-								<DropdownMenuLabel className="flex flex-col">
-									<span>Bruno</span>
-									<span className="text-xs font-normal text-muted-foreground">
-										teste@email.com
-									</span>
-								</DropdownMenuLabel>
-								<DropdownMenuSeparator />
-								<DropdownMenuItem>Meus Pedidos</DropdownMenuItem>
-								<DropdownMenuItem>Lista de Desejos</DropdownMenuItem>
-								<DropdownMenuItem>Configurações</DropdownMenuItem>
-								<DropdownMenuSeparator />
-								<DropdownMenuItem
-									asChild
-									className="text-rose-500 dark:text-rose-400"
-								>
-									<button
-										type="button"
-										className="w-full"
-									>
-										<LogOut className="mr-2 h-4 w-4" />
-										<span>Sair</span>
-									</button>
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<AccountMenu />
 						<Button
 							variant="ghost"
 							size="icon"

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Lato, Montserrat } from 'next/font/google';
 import './globals.css';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/components/theme/theme-provider';
 
 const lato = Lato({
 	variable: '--font-lato',
