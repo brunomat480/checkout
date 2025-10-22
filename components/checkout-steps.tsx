@@ -12,7 +12,7 @@ export function CheckoutSteps({ step = 'paid' }: CheckoutStepsProps) {
 					variant="sm"
 					className="font-medium"
 				>
-					Carrinho
+					Produtos
 				</Text>
 				<div className="bg-foreground w-full h-1 rounded-full">
 					<div
