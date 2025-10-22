@@ -1,5 +1,6 @@
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 
 export function ProductCardResume() {
@@ -18,13 +19,19 @@ export function ProductCardResume() {
 			<div className="flex-1 min-w-0">
 				<div className="flex items-start justify-between gap-4">
 					<div className="flex-1">
-						<h3 className="font-semibold text-base text-foreground mb-1">
+						<Text
+							as="h3"
+							className="font-semibold text-foreground mb-1"
+						>
 							Nome do Produto
-						</h3>
-						<p className="text-sm text-muted-foreground mb-3">
-							Descrição breve do produto
-						</p>
-						<p className="text-lg font-bold text-foreground">R$ 99,90</p>
+						</Text>
+						<Text
+							as="p"
+							variant="lg"
+							className="font-bold text-foreground"
+						>
+							R$ 99,90
+						</Text>
 					</div>
 
 					<Button
@@ -44,9 +51,9 @@ export function ProductCardResume() {
 					>
 						<Minus className="h-3 w-3" />
 					</Button>
-					<span className="text-sm font-medium min-w-[2rem] text-center">
+					<Text className="text-sm font-medium min-w-[2rem] text-center">
 						2
-					</span>
+					</Text>
 					<Button
 						variant="outline"
 						size="icon"
