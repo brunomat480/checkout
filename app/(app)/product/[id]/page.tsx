@@ -16,12 +16,17 @@ import { Separator } from '@/components/ui/separator';
 import { products } from '@/mocks/products';
 import { formatPrice } from '@/utils/format-price';
 
-export default function ProductPage({ params }: { params: { id: string } }) {
-	const product = products.find((p) => p.id === params.id) || products[0];
+export default async function ProductPage({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}) {
+	const { id } = await params;
+
+	const product = products.find((p) => p.id === id) || products[0]; // ← Use 'id' aqui
 	const relatedProducts = products.filter(
 		(p) => p.category === product.category && p.id !== product.id,
 	);
-
 	return (
 		<div className="min-h-screen bg-background">
 			<div className="container mx-auto px-4 py-6 md:py-8">
@@ -72,8 +77,6 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 								{formatPrice(product.price)}
 							</div>
 						</div>
-
-						{/* <Separator /> */}
 
 						{product.description && (
 							<div>
@@ -174,7 +177,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 						>
 							Produtos Relacionados
 						</Text>
-						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
 							{relatedProducts.map((relatedProduct) => (
 								<ProductCard
 									key={relatedProduct.id}

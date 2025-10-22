@@ -40,8 +40,6 @@ export function AccountMenu() {
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem>Meus Pedidos</DropdownMenuItem>
-				<DropdownMenuItem>Lista de Desejos</DropdownMenuItem>
-				<DropdownMenuItem>Configurações</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					asChild
