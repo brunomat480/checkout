@@ -59,7 +59,7 @@ export function PixPayment() {
 				</div>
 
 				<div className="bg-primary rounded-full size-40 flex items-center justify-center mx-auto">
-					<QrCode className="size-28" />
+					<QrCode className="size-28 text-white" />
 				</div>
 
 				<div className="space-y-2">

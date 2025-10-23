@@ -1,7 +1,6 @@
 import { Barcode, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { PixIcon } from '@/assets/icons/pix';
-import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 
 interface PaymentButtonsProps {
@@ -16,14 +15,14 @@ export function PaymentButtons({ paymentMethod }: PaymentButtonsProps) {
 				size="xl"
 				variant={paymentMethod === 'pix' ? 'default' : 'outline'}
 				disabled={paymentMethod === 'pix'}
-				className="w-full lg:w-72"
+				className="w-full lg:w-72 text-base font-medium hover:text-white group"
 			>
 				<Link
 					href="/resume/payment?method=pix"
 					scroll={false}
 				>
-					<PixIcon className="fill-foreground size-6" />
-					<Text>Pix</Text>
+					<PixIcon className="fill-foreground size-6 " />
+					Pix
 				</Link>
 			</Button>
 
@@ -32,14 +31,14 @@ export function PaymentButtons({ paymentMethod }: PaymentButtonsProps) {
 				size="xl"
 				variant={paymentMethod === 'credit_card' ? 'default' : 'outline'}
 				disabled={paymentMethod === 'credit_card'}
-				className="w-full lg:w-72 "
+				className="w-full lg:w-72 text-base font-medium hover:text-white"
 			>
 				<Link
 					href="/resume/payment?method=credit_card"
 					scroll={false}
 				>
 					<CreditCard className="size-6" />
-					<Text>Cartão de Crédito</Text>
+					Cartão de Crédito
 				</Link>
 			</Button>
 
@@ -48,14 +47,14 @@ export function PaymentButtons({ paymentMethod }: PaymentButtonsProps) {
 				size="xl"
 				variant={paymentMethod === 'bank_slip' ? 'default' : 'outline'}
 				disabled={paymentMethod === 'bank_slip'}
-				className="w-full lg:w-72 "
+				className="w-full lg:w-72 text-base font-medium hover:text-white"
 			>
 				<Link
 					href="/resume/payment?method=bank_slip"
 					scroll={false}
 				>
 					<Barcode className="size-6" />
-					<Text>Boleto</Text>
+					Boleto
 				</Link>
 			</Button>
 		</div>

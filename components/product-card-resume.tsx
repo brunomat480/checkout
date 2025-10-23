@@ -45,7 +45,7 @@ export function ProductCardResume() {
 
 				<div className="flex items-center gap-2 mt-4">
 					<Button
-						variant="outline"
+						variant="ghost"
 						size="icon"
 						className="h-8 w-8 bg-transparent"
 					>
@@ -55,7 +55,7 @@ export function ProductCardResume() {
 						2
 					</Text>
 					<Button
-						variant="outline"
+						variant="ghost"
 						size="icon"
 						className="h-8 w-8 bg-transparent"
 					>

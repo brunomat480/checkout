@@ -1,8 +1,12 @@
-import Link from 'next/link';
+import type { Metadata } from 'next';
 import { ProductCard } from '@/components/product-card';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { products } from '@/mocks/products';
+
+export const metadata: Metadata = {
+	title: 'Produtos',
+};
 
 export default function HomePage() {
 	return (

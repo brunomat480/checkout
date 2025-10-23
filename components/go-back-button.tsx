@@ -1,13 +1,26 @@
 'use client';
 
 import { ChevronLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 export function GoBackButton() {
+	const path = usePathname();
 	const router = useRouter();
 
+	console.log(path);
+
 	function handleGoback() {
+		if (path === '/resume/payment') {
+			router.push('/resume');
+			return;
+		}
+
+		if (path === '/resume') {
+			router.push('/');
+			return;
+		}
+
 		router.back();
 	}
 

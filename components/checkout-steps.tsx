@@ -14,7 +14,7 @@ export function CheckoutSteps({ step = 'paid' }: CheckoutStepsProps) {
 				>
 					Produtos
 				</Text>
-				<div className="bg-foreground w-full h-1 rounded-full">
+				<div className="bg-muted-foreground w-full h-1 rounded-full">
 					<div
 						className={`h-1 rounded-full bg-primary ${step === 'pending' ? 'w-full' : 'w-0'}`}
 					/>
@@ -28,7 +28,7 @@ export function CheckoutSteps({ step = 'paid' }: CheckoutStepsProps) {
 				>
 					Pagamento
 				</Text>
-				<div className="bg-foreground w-full h-1 rounded-full">
+				<div className="bg-muted-foreground w-full h-1 rounded-full">
 					<div
 						className={`h-1 rounded-full bg-primary ${step === 'processing' ? 'w-full' : 'w-0'}`}
 					/>
@@ -42,7 +42,7 @@ export function CheckoutSteps({ step = 'paid' }: CheckoutStepsProps) {
 				>
 					Finalização
 				</Text>
-				<div className="bg-foreground w-full h-1 rounded-full">
+				<div className="bg-muted-foreground w-full h-1 rounded-full">
 					<div
 						className={`h-1 rounded-full bg-primary ${step === 'paid' ? 'w-full' : 'w-0'}`}
 					/>

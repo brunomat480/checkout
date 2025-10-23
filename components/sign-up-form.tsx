@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { HTTPError } from 'ky';
 import { useForm } from 'react-hook-form';
 import type z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -20,23 +21,39 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { api } from '@/lib/api';
 import { signUpSchema } from '@/schemas/sign-up-schema';
 
 type SignUpType = z.infer<typeof signUpSchema>;
 
-export function SignUp() {
+export function SignUpForm() {
 	const form = useForm<SignUpType>({
 		resolver: zodResolver(signUpSchema),
 		mode: 'all',
 		defaultValues: {
-			name: '',
+			// name: '',
 			email: '',
 			password: '',
 		},
 	});
 
-	function handleCreateAccount({ email, name, password }: SignUpType) {
-		console.log({ email, name, password });
+	async function handleCreateAccount({ email, password }: SignUpType) {
+		try {
+			const response = await api
+				.post('auth', {
+					json: {
+						email,
+						password,
+					},
+				})
+				.json();
+
+			console.log(response);
+		} catch (error) {
+			if (error as HTTPError) {
+				console.log(error);
+			}
+		}
 	}
 
 	return (
@@ -51,7 +68,7 @@ export function SignUp() {
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(handleCreateAccount)}>
 						<div className="flex flex-col gap-6">
-							<div className="grid gap-2">
+							{/* <div className="grid gap-2">
 								<FormLabel>Email</FormLabel>
 								<FormField
 									name="name"
@@ -69,7 +86,7 @@ export function SignUp() {
 										</FormItem>
 									)}
 								/>
-							</div>
+							</div> */}
 
 							<div className="grid gap-2">
 								<FormLabel>Email</FormLabel>

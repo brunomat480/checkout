@@ -24,7 +24,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
 	return (
 		<Link href={`/product/${product.id}`}>
-			<Card className="group overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-300 py-0">
+			<Card className="group overflow-hidden h-[28.125rem] border-0 shadow-sm hover:shadow-xl transition-all duration-300 py-0">
 				<div className="relative aspect-square overflow-hidden">
 					<Image
 						src={product.image || '/placeholder.svg'}
