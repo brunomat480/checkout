@@ -20,10 +20,17 @@
 			"recommended": true,
 			"suspicious": {
 				"noUnknownAtRules": "off",
-				"noArrayIndexKey": "off"
+				"noArrayIndexKey": "off",
+				"noGlobalIsNan": "off"
 			},
 			"a11y": {
 				"noSvgWithoutTitle": "off"
+			},
+			"style": {
+				"useConst": "off"
+			},
+			"correctness": {
+				"useParseIntRadix": "off"
 			}
 		}
 	},

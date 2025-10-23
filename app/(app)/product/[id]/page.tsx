@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { products } from '@/mocks/products';
+import type { Product } from '@/types/products';
 import { formatPrice } from '@/utils/format-price';
 
 export default async function ProductPage({
@@ -23,10 +24,16 @@ export default async function ProductPage({
 }) {
 	const { id } = await params;
 
-	const product = products.find((p) => p.id === id) || products[0]; // ← Use 'id' aqui
-	const relatedProducts = products.filter(
-		(p) => p.category === product.category && p.id !== product.id,
-	);
+	// let product: Product | null = null;
+
+	// try {
+	// 	const productResponse = await getProduct();
+
+	// 	product = productsResponse.products as Product;
+	// } catch {
+	// 	product = null;
+	// }
+
 	return (
 		<div className="min-h-screen bg-background">
 			<div className="container mx-auto px-4 py-6 md:py-8">
@@ -168,7 +175,7 @@ export default async function ProductPage({
 					</div>
 				</div>
 
-				{relatedProducts.length > 0 && (
+				{/* {relatedProducts.length > 0 && (
 					<section>
 						<Text
 							as="h2"
@@ -186,7 +193,7 @@ export default async function ProductPage({
 							))}
 						</div>
 					</section>
-				)}
+				)} */}
 			</div>
 		</div>
 	);

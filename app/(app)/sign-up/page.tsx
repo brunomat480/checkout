@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function SignUpPage() {
 	return (
-		<div className="container flex items-center justify-center">
+		<div className="h-screen container flex items-center justify-center">
 			<SignUpForm />
 		</div>
 	);

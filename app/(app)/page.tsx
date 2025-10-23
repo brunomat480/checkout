@@ -1,14 +1,25 @@
+import type { Product } from '@prisma/client';
 import type { Metadata } from 'next';
 import { ProductCard } from '@/components/product-card';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
-import { products } from '@/mocks/products';
+import { getProducts } from '@/services/products';
 
 export const metadata: Metadata = {
 	title: 'Produtos',
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+	let products: Product[] = [];
+
+	try {
+		const productsResponse = await getProducts();
+
+		products = productsResponse.products as Product[];
+	} catch {
+		products = [];
+	}
+
 	return (
 		<div className="min-h-screen bg-background">
 			<div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
