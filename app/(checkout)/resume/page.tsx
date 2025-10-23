@@ -27,7 +27,7 @@ import { Separator } from '@/components/ui/separator';
 
 export default function Home() {
 	return (
-		<main className="min-h-screen bg-background p-8">
+		<main className="min-h-screen">
 			<div className="max-w-7xl mx-auto">
 				<CheckoutSteps step="pending" />
 
