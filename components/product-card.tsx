@@ -64,9 +64,10 @@ export function ProductCard({ product }: ProductCardProps) {
 							em até 10x {formatPrice(product.price / 10)}
 						</Text>
 					</div>
+
 					<Button
-						className="w-full h-9"
 						size="sm"
+						className="w-full h-9"
 						onClick={(e) => {
 							e.preventDefault();
 							e.stopPropagation();
@@ -75,6 +76,15 @@ export function ProductCard({ product }: ProductCardProps) {
 					>
 						<ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
 						Adicionar
+					</Button>
+
+					<Button
+						asChild
+						size="sm"
+						variant="outline"
+						className="w-full h-9"
+					>
+						<Link href={`/product/${product.id}`}>Detalhes</Link>
 					</Button>
 				</CardContent>
 			</Card>

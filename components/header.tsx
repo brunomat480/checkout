@@ -29,7 +29,7 @@ export function Header() {
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
-			<div className="container mx-auto px-4">
+			<div className="px-4">
 				<div className="hidden md:flex items-center justify-between py-2 text-sm text-muted-foreground border-b">
 					<div className="flex items-center gap-6">
 						<Text variant="sm">Frete grátis acima de R$ 200</Text>

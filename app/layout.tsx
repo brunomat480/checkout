@@ -1,5 +1,5 @@
-import type { Metadata } from 'next';
 import { Lato, Montserrat } from 'next/font/google';
+import { Toaster } from 'sonner';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 
@@ -27,6 +27,7 @@ export default function RootLayout({
 			<body
 				className={`${lato.variable} ${montserrat.variable} antialiased font-lato`}
 			>
+				<Toaster richColors />
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="dark"
