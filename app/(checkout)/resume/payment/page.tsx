@@ -22,7 +22,7 @@ export default async function PaymentPage({
 	}
 
 	return (
-		<div className="min-h-screen">
+		<div className="min-h-screen pb-4">
 			<CheckoutSteps step="processing" />
 
 			<div className="mt-14">

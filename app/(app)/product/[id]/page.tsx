@@ -1,3 +1,4 @@
+import { HTTPError } from 'ky';
 import {
 	ChevronLeft,
 	RotateCcw,
@@ -13,26 +14,27 @@ import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { products } from '@/mocks/products';
+// import { products } from '@/mocks/products';
+import { getProduct } from '@/services/get-product';
 import type { Product } from '@/types/products';
+import { delay } from '@/utils/delay';
 import { formatPrice } from '@/utils/format-price';
 
-export default async function ProductPage({
-	params,
-}: {
+interface ProductPageProps {
 	params: Promise<{ id: string }>;
-}) {
+}
+
+export default async function ProductPage({ params }: ProductPageProps) {
 	const { id } = await params;
 
-	// let product: Product | null = null;
-
-	// try {
-	// 	const productResponse = await getProduct();
-
-	// 	product = productsResponse.products as Product;
-	// } catch {
-	// 	product = null;
-	// }
+	let product: Product | null = null;
+	try {
+		await delay();
+		const productResponse = await getProduct(id);
+		product = productResponse;
+	} catch {
+		product = null;
+	}
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -54,8 +56,8 @@ export default async function ProductPage({
 					<div className="space-y-4">
 						<div className="aspect-square rounded-lg overflow-hidden bg-muted">
 							<Image
-								src={product.image || '/placeholder.svg'}
-								alt={product.name}
+								src={product?.image || 'https://via.placeholder.com/150'}
+								alt={product?.name || ''}
 								width={600}
 								height={600}
 								className="object-cover w-full h-full"
@@ -65,27 +67,27 @@ export default async function ProductPage({
 
 					<div className="space-y-6">
 						<div>
-							<Badge className="mb-3">{product.category}</Badge>
+							<Badge className="mb-3">{product?.category}</Badge>
 							<h1 className="text-3xl md:text-4xl font-bold mb-4">
-								{product.name}
+								{product?.name}
 							</h1>
 							<div className="flex items-center gap-4 mb-4">
 								<div className="flex items-center gap-1">
 									{[...Array(5)].map((_, i) => (
 										<Star
 											key={i}
-											className={`h-5 w-5 ${i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-muted'}`}
+											className={`h-5 w-5 ${i < Math.floor(product?.rating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-muted'}`}
 										/>
 									))}
 								</div>
-								<span className="text-sm font-medium">{product.rating}</span>
+								<span className="text-sm font-medium">{product?.rating}</span>
 							</div>
 							<div className="text-4xl font-bold text-primary">
-								{formatPrice(product.price)}
+								{formatPrice(product?.price || 0)}
 							</div>
 						</div>
 
-						{product.description && (
+						{product?.description && (
 							<div>
 								<Text
 									as="h3"
@@ -97,7 +99,7 @@ export default async function ProductPage({
 									as="p"
 									className="text-muted-foreground leading-relaxed"
 								>
-									{product.description}
+									{product?.description}
 								</Text>
 							</div>
 						)}

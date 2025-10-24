@@ -3,7 +3,8 @@ import type { Metadata } from 'next';
 import { ProductCard } from '@/components/product-card';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
-import { getProducts } from '@/services/products';
+import { getProducts } from '@/services/get-products';
+import { delay } from '@/utils/delay';
 
 export const metadata: Metadata = {
 	title: 'Produtos',
@@ -13,6 +14,7 @@ export default async function HomePage() {
 	let products: Product[] = [];
 
 	try {
+		await delay();
 		const productsResponse = await getProducts();
 
 		products = productsResponse.products as Product[];
