@@ -31,7 +31,5 @@ export async function createOrder({
 		})
 		.json();
 
-	console.log('Resposta', response);
-
 	return response;
 }

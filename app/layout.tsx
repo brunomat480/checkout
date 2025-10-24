@@ -2,6 +2,7 @@ import { Lato, Montserrat } from 'next/font/google';
 import { Toaster } from 'sonner';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme/theme-provider';
+import { CheckoutProvider } from '@/contexts/checkout-context';
 
 const lato = Lato({
 	variable: '--font-lato',
@@ -34,7 +35,7 @@ export default function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
-					{children}
+					<CheckoutProvider>{children}</CheckoutProvider>
 				</ThemeProvider>
 			</body>
 		</html>

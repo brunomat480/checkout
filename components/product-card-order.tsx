@@ -2,13 +2,26 @@ import { Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
+import { formatPrice } from '@/utils/format-price';
 
-export function ProductCardResume() {
+interface Product {
+	name: string;
+	image: string;
+	description: string;
+	quantity: number;
+	price: number;
+}
+
+interface ProductCardOrderProps {
+	product: Product;
+}
+
+export function ProductCardOrder({ product }: ProductCardOrderProps) {
 	return (
 		<div className="flex items-start gap-4 py-6 border-b border-border/40 last:border-0">
 			<div className="flex-shrink-0 overflow-hidden rounded-lg border border-border/50">
 				<Image
-					src="https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500&q=80"
+					src={product?.image || ''}
 					alt="Produto"
 					width={120}
 					height={120}
@@ -23,14 +36,14 @@ export function ProductCardResume() {
 							as="h3"
 							className="font-semibold text-foreground mb-1"
 						>
-							Nome do Produto
+							{product?.name}
 						</Text>
 						<Text
 							as="p"
 							variant="lg"
 							className="font-bold text-foreground"
 						>
-							R$ 99,90
+							{formatPrice(product.price * product.quantity)}
 						</Text>
 					</div>
 
@@ -52,7 +65,7 @@ export function ProductCardResume() {
 						<Minus className="h-3 w-3" />
 					</Button>
 					<Text className="text-sm font-medium min-w-[2rem] text-center">
-						2
+						{product.quantity}
 					</Text>
 					<Button
 						variant="ghost"

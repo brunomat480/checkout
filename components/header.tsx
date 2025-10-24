@@ -3,7 +3,7 @@
 import { LogOut, Menu, Search, ShoppingCart, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AccountMenu } from '@/components/account-menu';
 import { Text } from '@/components/text';
 import { ThemeButton } from '@/components/theme/theme-button';
@@ -17,9 +17,13 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from '@/components/ui/sheet';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useCheckout } from '@/hooks/use-checkout';
 
 export function Header() {
 	const path = usePathname();
+
+	const { totalItens, loading } = useCheckout();
 
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -142,6 +146,7 @@ export function Header() {
 
 					<div className="flex items-center gap-1 md:gap-2">
 						<AccountMenu />
+
 						<Button
 							asChild
 							variant="ghost"
@@ -150,12 +155,17 @@ export function Header() {
 						>
 							<Link href="/resume">
 								<ShoppingCart className="h-5 w-5" />
-								<Badge
-									variant="destructive"
-									className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-								>
-									3
-								</Badge>
+								{loading && (
+									<Skeleton className="absolute -top-1 -right-1 h-5 w-5 rounded-full" />
+								)}
+								{!loading && (
+									<Badge
+										variant="destructive"
+										className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+									>
+										{totalItens}
+									</Badge>
+								)}
 							</Link>
 						</Button>
 					</div>
