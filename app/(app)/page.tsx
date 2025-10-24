@@ -1,4 +1,5 @@
 import type { Product } from '@prisma/client';
+import { HTTPError } from 'ky';
 import type { Metadata } from 'next';
 import { ProductCard } from '@/components/product-card';
 import { Text } from '@/components/text';
@@ -18,7 +19,10 @@ export default async function HomePage() {
 		const productsResponse = await getProducts();
 
 		products = productsResponse.products as Product[];
-	} catch {
+	} catch (error) {
+		if (error instanceof HTTPError) {
+			console.log(error.message);
+		}
 		products = [];
 	}
 

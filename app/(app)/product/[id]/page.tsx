@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { ProductCard } from '@/components/product-card';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +33,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
 		await delay();
 		const productResponse = await getProduct(id);
 		product = productResponse;
-	} catch {
+	} catch (error) {
+		if (error instanceof HTTPError) {
+			if (error.response.status === 404) {
+				notFound();
+			}
+			product = null;
+		}
 		product = null;
 	}
 
