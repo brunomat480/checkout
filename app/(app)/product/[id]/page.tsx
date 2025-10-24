@@ -7,6 +7,7 @@ import {
 	Star,
 	Truck,
 } from 'lucide-react';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -15,11 +16,39 @@ import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-// import { products } from '@/mocks/products';
 import { getProduct } from '@/services/get-product';
 import type { Product } from '@/types/products';
 import { delay } from '@/utils/delay';
 import { formatPrice } from '@/utils/format-price';
+
+interface MetadataProps {
+	params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({
+	params,
+}: MetadataProps): Promise<Metadata> {
+	const { id } = await params;
+
+	let product: Product | null = null;
+	try {
+		await delay();
+		const productResponse = await getProduct(id);
+		product = productResponse;
+	} catch (error) {
+		if (error instanceof HTTPError) {
+			if (error.response.status === 404) {
+				notFound();
+			}
+			product = null;
+		}
+		product = null;
+	}
+
+	return {
+		title: `Detalhes | ${product?.name}`,
+	};
+}
 
 interface ProductPageProps {
 	params: Promise<{ id: string }>;

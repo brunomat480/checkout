@@ -1,12 +1,12 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { type JWTPayload, verifyToken } from './jwt';
+import { verifyToken } from './jwt';
 
-const TOKEN_NAME = 'd64a9d7049d31f6d43e12fb73617070e';
+// const TOKEN_NAME = 'd64a9d7049d31f6d43e12fb73617070e';
 
 export async function setAuthToken(token: string) {
 	const cookieStore = await cookies();
-	cookieStore.set(TOKEN_NAME, token, {
+	cookieStore.set('auth-token', token, {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === 'production',
 		sameSite: 'lax',
@@ -16,15 +16,15 @@ export async function setAuthToken(token: string) {
 
 export async function getAuthToken(): Promise<string | null> {
 	const cookieStore = await cookies();
-	return cookieStore.get(TOKEN_NAME)?.value || null;
+	return cookieStore.get('auth-token')?.value || null;
 }
 
 export async function removeAuthToken() {
 	const cookieStore = await cookies();
-	cookieStore.delete(TOKEN_NAME);
+	cookieStore.delete('auth-token');
 }
 
-export async function getCurrentUser(): Promise<JWTPayload | null> {
+export async function getCurrentUser(): Promise<any | null> {
 	try {
 		const token = await getAuthToken();
 		if (!token) return null;
@@ -35,7 +35,7 @@ export async function getCurrentUser(): Promise<JWTPayload | null> {
 	}
 }
 
-export async function requireAuth(): Promise<JWTPayload> {
+export async function requireAuth(): Promise<any> {
 	const user = await getCurrentUser();
 
 	if (!user) {

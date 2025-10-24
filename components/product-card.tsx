@@ -1,8 +1,11 @@
 'use client';
 
-import { ShoppingCart, Star } from 'lucide-react';
+import { LoaderCircle, ShoppingCart, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTransition } from 'react';
+import { toast } from 'sonner';
+import { createOrderAction } from '@/actions/order/create-order-action';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,7 +14,7 @@ import { formatPrice } from '@/utils/format-price';
 
 interface ProductCardProps {
 	product: {
-		id: number | string;
+		id: number;
 		image: string;
 		name: string;
 		category: string;
@@ -22,6 +25,32 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+	const [isPending, startTransition] = useTransition();
+
+	async function handleAddProductOrder(productId: number) {
+		startTransition(async () => {
+			try {
+				const response = await createOrderAction({ productId });
+
+				if (!response.success) {
+					toast.error(response?.error, {
+						position: 'top-right',
+					});
+
+					return;
+				}
+
+				toast.success(`${product.name} foi adicionado ao carrinho`, {
+					position: 'top-right',
+				});
+			} catch {
+				toast.error('Erro ao adicionar produto ao carrinho', {
+					position: 'bottom-right',
+				});
+			}
+		});
+	}
+
 	return (
 		<Card className="group overflow-hidden h-[28.125rem] border-0 shadow-sm hover:shadow-xl transition-all duration-300 py-0">
 			<div className="relative aspect-square overflow-hidden h-96 ">
@@ -64,20 +93,28 @@ export function ProductCard({ product }: ProductCardProps) {
 
 				<Button
 					size="sm"
+					disabled={isPending}
 					className="w-full h-9"
 					onClick={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
-						console.log('Adicionar ao carrinho:', product.id);
+						handleAddProductOrder(product.id);
 					}}
 				>
-					<ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-					Adicionar
+					{isPending ? (
+						<LoaderCircle className="animate-spin" />
+					) : (
+						<>
+							<ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+							Adicionar
+						</>
+					)}
 				</Button>
 
 				<Button
 					asChild
 					size="sm"
+					disabled={isPending}
 					variant="outline"
 					className="w-full h-9"
 				>

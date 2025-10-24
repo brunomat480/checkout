@@ -1,3 +1,5 @@
+'use server';
+
 import { HTTPError } from 'ky';
 import { auth } from '@/services/auth';
 
@@ -18,6 +20,12 @@ export async function createAccountAction({
 	email,
 	password,
 }: CreateAccount): Promise<CreateAccountResponse> {
+	console.log({
+		name,
+		email,
+		password,
+	});
+
 	try {
 		const response = await auth({
 			name,

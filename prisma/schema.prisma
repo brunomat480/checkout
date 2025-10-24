@@ -13,18 +13,63 @@ model User {
   password  String
   name      String?
   createdAt DateTime @default(now()) @map("created_at")
+  orders    Order[]
   
   @@map("users")
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   price       Float
   image       String
   rating      Float
   category    String
   description String
-
+  orderItems  OrderItem[]
+  
   @@map("products")
 }
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  userId       Int
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items        OrderItem[]
+  status       OrderStatus @default(ACTIVE)
+  totalAmount  Float       @default(0)
+  subtotal     Float       @default(0)
+  shipping     Float       @default(0)
+  discount     Float       @default(0)
+  orderNumber  String?     @unique
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  
+  @@unique([userId, status], name: "user_active_order")
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(1)
+  price     Float
+  createdAt DateTime @default(now()) @map("created_at") 
+  updatedAt DateTime @updatedAt @map("updated_at")      
+
+  @@unique([orderId, productId], name: "order_product_unique")
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  ACTIVE
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
