@@ -31,10 +31,7 @@ export async function createPaymentAction({
 			card,
 		});
 
-		return {
-			success: true,
-			message: response.message,
-		};
+		return response;
 	} catch (error) {
 		if (error instanceof HTTPError) {
 			const errBody = await error.response.json();

@@ -1,14 +1,21 @@
 'use client';
 
 import { HTTPError } from 'ky';
-import { Copy, LoaderCircle, QrCode } from 'lucide-react';
+import { Copy, LoaderCircle, QrCode, Zap } from 'lucide-react';
 import { useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { createPaymentAction } from '@/actions/payments/create-payment-action';
+import { payOrderAction } from '@/actions/payments/pay-order-action';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useCheckout } from '@/hooks/use-checkout';
 
 export function PixPayment() {
@@ -18,6 +25,7 @@ export function PixPayment() {
 	const [pixCode, setPixCode] = useState<string | undefined>('');
 	const [qrCodeGenerated, setQrCodeGenerated] = useState(false);
 	const [isPending, startTransition] = useTransition();
+	const [isPayingPending, startPayingTransition] = useTransition();
 
 	const totalTime = 10 * 60;
 
@@ -46,8 +54,6 @@ export function PixPayment() {
 	const progressValue = ((totalTime - timeLeft) / totalTime) * 100;
 
 	async function handleCreatePayment() {
-		console.log(order?.id);
-
 		startTransition(async () => {
 			if (!order?.id) {
 				toast.error('Pedido não encontrado', {
@@ -97,6 +103,47 @@ export function PixPayment() {
 		navigator.clipboard.writeText(pixCode);
 		toast.success('Código copiado!', {
 			position: 'top-right',
+		});
+	}
+
+	async function handlePay() {
+		startPayingTransition(async () => {
+			if (!order?.id) {
+				toast.error('Pedido não encontrado', {
+					position: 'top-right',
+				});
+				return;
+			}
+
+			try {
+				const responsepayOrder = await payOrderAction({ orderId: order?.id });
+
+				console.log(responsepayOrder);
+
+				if (responsepayOrder.success) {
+					toast.success('Pagamento realizado com sucesso!', {
+						position: 'top-right',
+					});
+
+					return;
+				}
+
+				if (!responsepayOrder.success) {
+					toast.error('Erro ao tentar realizar o pagamento', {
+						position: 'top-right',
+					});
+				}
+			} catch (error) {
+				if (error instanceof HTTPError) {
+					toast.error(error.message, {
+						position: 'top-right',
+					});
+				} else {
+					toast.error('Erro ao tentar realizar o pagamento', {
+						position: 'top-right',
+					});
+				}
+			}
 		});
 	}
 
@@ -178,15 +225,46 @@ export function PixPayment() {
 							</Text>
 						</div>
 
-						<Button
-							onClick={handleCopyToClipboard}
-							variant="secondary"
-							size="lg"
-							className="w-full max-w-xs mx-auto flex gap-2"
-						>
-							<Copy className="h-4 w-4" />
-							Copiar código
-						</Button>
+						<div className="flex flex-col gap-3">
+							<Button
+								onClick={handleCopyToClipboard}
+								variant="secondary"
+								size="lg"
+								className="w-full max-w-xs mx-auto flex gap-2"
+							>
+								<Copy className="h-4 w-4" />
+								Copiar código
+							</Button>
+
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button
+											onClick={handlePay}
+											disabled={isPayingPending}
+											variant="outline"
+											size="lg"
+											className="w-full max-w-xs mx-auto flex gap-2"
+										>
+											{isPayingPending ? (
+												<>
+													<LoaderCircle className="h-4 w-4 animate-spin" />
+													Processando...
+												</>
+											) : (
+												<>
+													<Zap className="h-4 w-4" />
+													Simular Pagamento
+												</>
+											)}
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent>
+										<p>Simula a confirmação do pagamento PIX</p>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
+						</div>
 					</>
 				)}
 			</CardContent>

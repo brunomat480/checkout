@@ -77,7 +77,7 @@ model Payment {
   amount         Float
   
   
-  externalId     String?       @unique
+  externalId     String? 
   
   
   pixCode        String?       
