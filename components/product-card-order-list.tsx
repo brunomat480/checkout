@@ -35,15 +35,19 @@ function ProductCardOrderSkeleton() {
 }
 
 export function ProductCardOrderList() {
-	const { order, loading } = useCheckout();
+	const { order } = useCheckout();
+
+	const hasOrder = order ? order?.items.length > 1 : false;
 
 	return (
 		<>
-			{!loading &&
+			{hasOrder &&
 				order?.items.map((item) => (
 					<ProductCardOrder
 						key={item.id}
+						itemId={item.id}
 						product={{
+							id: item.product.id,
 							name: item.product.name,
 							image: item.product.image,
 							description: item.product.description,
@@ -53,7 +57,7 @@ export function ProductCardOrderList() {
 					/>
 				))}
 
-			{loading &&
+			{!hasOrder &&
 				Array.from({ length: 4 }).map((_, i) => (
 					<ProductCardOrderSkeleton key={i} />
 				))}

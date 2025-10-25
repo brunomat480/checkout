@@ -246,11 +246,6 @@ export async function POST(request: NextRequest) {
 
 		const newTotalAmount = newSubtotal - order.discount + order.shipping;
 
-		console.log('Novos totais:', {
-			subtotal: newSubtotal,
-			total: newTotalAmount,
-		});
-
 		const updatedOrder = await prisma.order.update({
 			where: { id: order.id },
 			data: {
@@ -327,6 +322,154 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json(
 			{ error: `Erro interno ao adicionar item ao carrinho: ${error.message}` },
+			{ status: 500 },
+		);
+	}
+}
+
+export async function DELETE(request: NextRequest) {
+	try {
+		const currentUser = await getCurrentUser();
+
+		if (!currentUser) {
+			return NextResponse.json(
+				{ error: 'Usuário não autenticado' },
+				{ status: 401 },
+			);
+		}
+
+		const { searchParams } = new URL(request.url);
+		const itemId = searchParams.get('itemId');
+		const quantityToRemove = searchParams.get('quantity');
+
+		if (!itemId) {
+			return NextResponse.json(
+				{ error: 'ID do item é obrigatório' },
+				{ status: 400 },
+			);
+		}
+
+		const orderItem = await prisma.orderItem.findFirst({
+			where: {
+				id: parseInt(itemId),
+				order: {
+					userId: parseInt(currentUser.userId),
+					status: OrderStatus.ACTIVE,
+				},
+			},
+			include: {
+				order: true,
+				product: true,
+			},
+		});
+
+		if (!orderItem) {
+			return NextResponse.json(
+				{ error: 'Item não encontrado no carrinho' },
+				{ status: 404 },
+			);
+		}
+
+		let message = '';
+		let updatedOrder: any;
+
+		if (quantityToRemove) {
+			const removeQuantity = parseInt(quantityToRemove);
+
+			if (removeQuantity <= 0) {
+				return NextResponse.json(
+					{ error: 'Quantidade deve ser maior que 0' },
+					{ status: 400 },
+				);
+			}
+
+			if (removeQuantity >= orderItem.quantity) {
+				await prisma.orderItem.delete({
+					where: { id: parseInt(itemId) },
+				});
+				message = 'Item removido do carrinho';
+			} else {
+				await prisma.orderItem.update({
+					where: { id: parseInt(itemId) },
+					data: {
+						quantity: orderItem.quantity - removeQuantity,
+						updatedAt: new Date(),
+					},
+				});
+				message = `${removeQuantity} unidade(s) removida(s) do item`;
+			}
+		} else {
+			await prisma.orderItem.delete({
+				where: { id: parseInt(itemId) },
+			});
+			message = 'Item removido do carrinho';
+		}
+
+		const remainingItems = await prisma.orderItem.findMany({
+			where: { orderId: orderItem.order.id },
+			include: { product: true },
+		});
+
+		const newSubtotal = remainingItems.reduce((total, item) => {
+			return total + item.product.price * item.quantity;
+		}, 0);
+
+		const newTotalAmount =
+			newSubtotal - orderItem.order.discount + orderItem.order.shipping;
+
+		updatedOrder = await prisma.order.update({
+			where: { id: orderItem.order.id },
+			data: {
+				subtotal: newSubtotal,
+				totalAmount: newTotalAmount,
+				updatedAt: new Date(),
+			},
+			include: {
+				items: {
+					include: {
+						product: {
+							select: {
+								id: true,
+								name: true,
+								price: true,
+								image: true,
+								category: true,
+								description: true,
+								rating: true,
+							},
+						},
+					},
+					orderBy: {
+						createdAt: 'asc',
+					},
+				},
+				user: {
+					select: {
+						id: true,
+						name: true,
+						email: true,
+					},
+				},
+			},
+		});
+
+		return NextResponse.json({
+			success: true,
+			order: updatedOrder,
+			message: message,
+		});
+	} catch (error: any) {
+		console.error('Error removing item from order:', error);
+
+		if (error.code === 'P2025') {
+			return NextResponse.json(
+				{ error: 'Item não encontrado' },
+				{ status: 404 },
+			);
+		}
+
+		return NextResponse.json(
+			{ error: `Erro ao remover item do carrinho: ${error.message}` },
 			{ status: 500 },
 		);
 	}

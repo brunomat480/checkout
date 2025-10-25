@@ -6,7 +6,7 @@ interface CreateOrder {
 	quantity?: number;
 }
 
-interface CreateOrderResponse {
+export interface CreateOrderResponse {
 	success: boolean;
 	message?: string;
 	error?: string;

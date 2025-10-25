@@ -10,6 +10,7 @@ import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { useCheckout } from '@/hooks/use-checkout';
 import { formatPrice } from '@/utils/format-price';
 
 interface ProductCardProps {
@@ -26,11 +27,12 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
 	const [isPending, startTransition] = useTransition();
+	const { addProductOrder } = useCheckout();
 
 	async function handleAddProductOrder(productId: number) {
 		startTransition(async () => {
 			try {
-				const response = await createOrderAction({ productId });
+				const response = await addProductOrder(productId);
 
 				if (!response.success) {
 					toast.error(response?.error, {
