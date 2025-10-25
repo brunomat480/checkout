@@ -1,5 +1,3 @@
-// import { cookies } from 'next/headers';
-
 import { cookies } from 'next/headers';
 import { api } from '@/lib/api';
 import type { Product } from '@/types/products';

@@ -161,6 +161,7 @@
 
 import { HTTPError } from 'ky';
 import { Barcode, Copy, LoaderCircle, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { createPaymentAction } from '@/actions/payments/create-payment-action';
@@ -177,6 +178,8 @@ import {
 import { useCheckout } from '@/hooks/use-checkout';
 
 export function BankSlipPayment() {
+	const router = useRouter();
+
 	const { order } = useCheckout();
 
 	const [boletoCode, setBoletoCode] = useState<string | undefined>('');
@@ -247,20 +250,19 @@ export function BankSlipPayment() {
 
 			try {
 				const responsepayOrder = await payOrderAction({ orderId: order?.id });
-				console.log(responsepayOrder);
-
-				if (responsepayOrder.success) {
-					toast.success('Pagamento realizado com sucesso!', {
-						position: 'top-right',
-					});
-					return;
-				}
 
 				if (!responsepayOrder.success) {
 					toast.error('Erro ao tentar realizar o pagamento', {
 						position: 'top-right',
 					});
+					return;
 				}
+
+				toast.success('Pagamento realizado com sucesso!', {
+					position: 'top-right',
+				});
+
+				router.push(`/resume/payment/success/${responsepayOrder.payment?.id}`);
 			} catch (error) {
 				if (error instanceof HTTPError) {
 					toast.error(error.message, {

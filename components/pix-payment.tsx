@@ -2,6 +2,7 @@
 
 import { HTTPError } from 'ky';
 import { Copy, LoaderCircle, QrCode, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { createPaymentAction } from '@/actions/payments/create-payment-action';
@@ -19,6 +20,8 @@ import {
 import { useCheckout } from '@/hooks/use-checkout';
 
 export function PixPayment() {
+	const router = useRouter();
+
 	const { order } = useCheckout();
 
 	const [timeLeft, setTimeLeft] = useState(10 * 60);
@@ -118,21 +121,18 @@ export function PixPayment() {
 			try {
 				const responsepayOrder = await payOrderAction({ orderId: order?.id });
 
-				console.log(responsepayOrder);
-
-				if (responsepayOrder.success) {
-					toast.success('Pagamento realizado com sucesso!', {
-						position: 'top-right',
-					});
-
-					return;
-				}
-
 				if (!responsepayOrder.success) {
 					toast.error('Erro ao tentar realizar o pagamento', {
 						position: 'top-right',
 					});
+					return;
 				}
+
+				toast.success('Pagamento realizado com sucesso!', {
+					position: 'top-right',
+				});
+
+				router.push(`/resume/payment/success/${responsepayOrder.payment?.id}`);
 			} catch (error) {
 				if (error instanceof HTTPError) {
 					toast.error(error.message, {

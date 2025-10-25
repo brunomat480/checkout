@@ -3,7 +3,6 @@ import { generateToken, verifyToken } from '@/lib/jwt';
 
 export async function GET() {
 	try {
-		// Gerar um novo token
 		const payload = {
 			userId: '1',
 			email: 'teste@gmail.com',
@@ -12,7 +11,6 @@ export async function GET() {
 		const newToken = await generateToken(payload);
 		console.log('🔐 NOVO TOKEN GERADO:', newToken);
 
-		// Tentar verificar o mesmo token
 		const verified = await verifyToken(newToken);
 		console.log('✅ TOKEN VERIFICADO:', verified);
 

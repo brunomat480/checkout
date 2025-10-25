@@ -2,6 +2,7 @@
 
 import { CircleCheck, Lock } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -10,11 +11,14 @@ import { useCheckout } from '@/hooks/use-checkout';
 import { formatPrice } from '@/utils/format-price';
 
 export function ResumeCard() {
+	const router = useRouter();
 	const { order, loading } = useCheckout();
 
 	const hasItems = order ? order?.items.length > 0 : false;
 
-	console.log(!hasItems);
+	function handleNavigation() {
+		router.push('/resume/payment');
+	}
 
 	if (loading) {
 		return (
@@ -107,6 +111,7 @@ export function ResumeCard() {
 				<Button
 					className="w-full mt-6"
 					size="lg"
+					onClick={handleNavigation}
 					disabled={!hasItems || loading}
 				>
 					Finalizar Compra

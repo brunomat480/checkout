@@ -8,7 +8,9 @@ export function GoBackButton() {
 	const path = usePathname();
 	const router = useRouter();
 
-	console.log(path);
+	if (path.startsWith('/resume/payment/success/')) {
+		return null;
+	}
 
 	function handleGoback() {
 		if (path === '/resume/payment') {
