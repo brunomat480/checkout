@@ -36,14 +36,14 @@ export function ProductCard({ product }: ProductCardProps) {
 
 				if (!response.success) {
 					toast.error(response?.error, {
-						position: 'top-right',
+						position: 'bottom-right',
 					});
 
 					return;
 				}
 
 				toast.success(`${product.name} foi adicionado ao carrinho`, {
-					position: 'top-right',
+					position: 'bottom-right',
 				});
 			} catch {
 				toast.error('Erro ao adicionar produto ao carrinho', {

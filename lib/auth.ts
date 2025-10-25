@@ -39,7 +39,7 @@ export async function requireAuth(): Promise<any> {
 	const user = await getCurrentUser();
 
 	if (!user) {
-		redirect('/login');
+		redirect('/sign-up');
 	}
 
 	return user;

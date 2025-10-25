@@ -14,6 +14,7 @@ model User {
   name      String?
   createdAt DateTime @default(now()) @map("created_at")
   orders    Order[]
+  payments  Payment[]
   
   @@map("users")
 }
@@ -36,6 +37,7 @@ model Order {
   userId       Int
   user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   items        OrderItem[]
+  payments     Payment[]
   status       OrderStatus @default(ACTIVE)
   totalAmount  Float       @default(0)
   subtotal     Float       @default(0)
@@ -64,6 +66,51 @@ model OrderItem {
   @@map("order_items")
 }
 
+model Payment {
+  id             Int           @id @default(autoincrement())
+  orderId        Int
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId         Int
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentMethod  PaymentMethod
+  paymentStatus  PaymentStatus @default(CREATED)
+  amount         Float
+  
+  
+  externalId     String?       @unique
+  
+  
+  pixCode        String?       
+  pixQrCode      String?       
+  pixImageUrl    String?       
+  
+  
+  boletoCode     String?       
+  boletoUrl      String?       
+  barcodeImage   String?       
+  
+  
+  cardLastFour   String?       
+  cardBrand      String?       
+  installments   Int?          @default(1) 
+  
+  
+  processorResponse String?     
+  failureReason     String?     
+  
+  
+  expiresAt      DateTime?     
+  paidAt         DateTime?     
+  refundedAt     DateTime?     
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  
+  @@index([externalId])
+  @@index([paymentStatus])
+  @@index([createdAt])
+  @@map("payments")
+}
+
 enum OrderStatus {
   ACTIVE
   PENDING
@@ -71,5 +118,22 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+  REFUNDED
 }
 
+enum PaymentMethod {
+  PIX
+  BANK_SLIP
+  CREDIT_CARD
+}
+
+enum PaymentStatus {
+  CREATED       
+  PENDING       
+  PROCESSING    
+  SUCCESS       
+  FAILED        
+  EXPIRED       
+  REFUNDED      
+  CANCELLED     
+}

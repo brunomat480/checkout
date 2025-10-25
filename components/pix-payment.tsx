@@ -1,19 +1,29 @@
 'use client';
 
-import { Copy, QrCode } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { HTTPError } from 'ky';
+import { Copy, LoaderCircle, QrCode } from 'lucide-react';
+import { useEffect, useState, useTransition } from 'react';
+import { toast } from 'sonner';
+import { createPaymentAction } from '@/actions/payments/create-payment-action';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { useCheckout } from '@/hooks/use-checkout';
 
 export function PixPayment() {
+	const { order } = useCheckout();
+
 	const [timeLeft, setTimeLeft] = useState(10 * 60);
+	const [pixCode, setPixCode] = useState<string | undefined>('');
+	const [qrCodeGenerated, setQrCodeGenerated] = useState(false);
+	const [isPending, startTransition] = useTransition();
+
 	const totalTime = 10 * 60;
-	const pixCode =
-		'00020126580014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540599.905802BR5925NOME DO BENEFICIARIO6014BELO HORIZONTE62070503***63041D3D';
 
 	useEffect(() => {
+		if (!qrCodeGenerated) return;
+
 		const timer = setInterval(() => {
 			setTimeLeft((prev) => {
 				if (prev <= 0) {
@@ -25,7 +35,7 @@ export function PixPayment() {
 		}, 1000);
 
 		return () => clearInterval(timer);
-	}, []);
+	}, [qrCodeGenerated]);
 
 	function formatTime(seconds: number) {
 		const mins = Math.floor(seconds / 60);
@@ -35,60 +45,150 @@ export function PixPayment() {
 
 	const progressValue = ((totalTime - timeLeft) / totalTime) * 100;
 
+	async function handleCreatePayment() {
+		console.log(order?.id);
+
+		startTransition(async () => {
+			if (!order?.id) {
+				toast.error('Pedido não encontrado', {
+					position: 'top-right',
+				});
+				return;
+			}
+
+			try {
+				const response = await createPaymentAction({
+					orderId: order?.id,
+					type: 'pix',
+				});
+
+				if (response?.payment) {
+					setPixCode(response?.payment?.qr_code_image);
+					setQrCodeGenerated(true);
+					setTimeLeft(10 * 60);
+					toast.success('QR Code gerado com sucesso!', {
+						position: 'top-right',
+					});
+
+					return;
+				}
+
+				if (!response.success) {
+					toast.error(response.error, {
+						position: 'top-right',
+					});
+				}
+			} catch (error) {
+				if (error instanceof HTTPError) {
+					toast.error(error.message, {
+						position: 'top-right',
+					});
+				} else {
+					toast.error('Erro ao gerar QR Code', {
+						position: 'top-right',
+					});
+				}
+			}
+		});
+	}
+
 	function handleCopyToClipboard() {
+		if (!pixCode) return;
 		navigator.clipboard.writeText(pixCode);
+		toast.success('Código copiado!', {
+			position: 'top-right',
+		});
 	}
 
 	return (
 		<Card className="max-w-2xl mx-auto">
 			<CardContent className="space-y-6">
-				<div className="text-center space-y-2">
-					<Text
-						as="p"
-						className="text-muted-foreground"
-					>
-						Abra o app com sua chave PIX cadastrada, escolha{' '}
-						<span className="font-semibold text-foreground">Pagar com Pix</span>
-					</Text>
-					<Text
-						as="p"
-						className="text-muted-foreground"
-					>
-						e escaneie o QR Code ou copie e cole o código.
-					</Text>
-				</div>
+				{!qrCodeGenerated ? (
+					<div className="text-center space-y-6 py-8">
+						<div className="space-y-2">
+							<Text
+								as="h3"
+								className="text-xl font-semibold"
+							>
+								Gerar QR Code PIX
+							</Text>
+							<Text
+								as="p"
+								className="text-muted-foreground"
+							>
+								Clique no botão abaixo para gerar o código PIX do seu pedido
+							</Text>
+						</div>
 
-				<div className="bg-primary rounded-full size-40 flex items-center justify-center mx-auto">
-					<QrCode className="size-28 text-white" />
-				</div>
+						<Button
+							onClick={handleCreatePayment}
+							disabled={isPending}
+							size="lg"
+							className="w-full max-w-xs mx-auto flex gap-2"
+						>
+							{isPending ? (
+								<LoaderCircle className="animate-spin" />
+							) : (
+								<>
+									<QrCode className="h-5 w-5" />
+									Gerar QR Code
+								</>
+							)}
+						</Button>
+					</div>
+				) : (
+					<>
+						<div className="text-center space-y-2">
+							<Text
+								as="p"
+								className="text-muted-foreground"
+							>
+								Abra o app com sua chave PIX cadastrada, escolha{' '}
+								<span className="font-semibold text-foreground">
+									Pagar com Pix
+								</span>
+							</Text>
+							<Text
+								as="p"
+								className="text-muted-foreground"
+							>
+								e escaneie o QR Code ou copie e cole o código.
+							</Text>
+						</div>
 
-				<div className="space-y-2">
-					<Progress
-						value={progressValue}
-						className="h-2"
-					/>
-					<Text
-						as="p"
-						variant="sm"
-						className="text-center text-muted-foreground"
-					>
-						Você tem{' '}
-						<span className="font-semibold text-foreground">
-							{formatTime(timeLeft)}
-						</span>{' '}
-						para pagar
-					</Text>
-				</div>
+						<div className="bg-primary rounded-full size-40 flex items-center justify-center mx-auto">
+							<QrCode className="size-28 text-white" />
+						</div>
 
-				<Button
-					onClick={handleCopyToClipboard}
-					variant="secondary"
-					size="lg"
-					className="w-full max-w-xs mx-auto flex gap-2"
-				>
-					<Copy className="h-4 w-4" />
-					Copiar código
-				</Button>
+						<div className="space-y-2">
+							<Progress
+								value={progressValue}
+								className="h-2"
+							/>
+							<Text
+								as="p"
+								variant="sm"
+								className="text-center text-muted-foreground"
+							>
+								Você tem{' '}
+								<span className="font-semibold text-foreground">
+									{formatTime(timeLeft)}
+								</span>{' '}
+								para pagar
+							</Text>
+						</div>
+
+						<Button
+							onClick={handleCopyToClipboard}
+							variant="secondary"
+							size="lg"
+							className="w-full max-w-xs mx-auto flex gap-2"
+						>
+							<Copy className="h-4 w-4" />
+							Copiar código
+						</Button>
+					</>
+				)}
 			</CardContent>
 		</Card>
 	);

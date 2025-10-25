@@ -1,5 +1,6 @@
 'use client';
 
+import { ShoppingCart } from 'lucide-react';
 import { ProductCardOrder } from '@/components/product-card-order';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCheckout } from '@/hooks/use-checkout';
@@ -34,33 +35,53 @@ function ProductCardOrderSkeleton() {
 	);
 }
 
-export function ProductCardOrderList() {
-	const { order } = useCheckout();
+function EmptyCart() {
+	return (
+		<div className="flex flex-col items-center justify-center py-12 px-4">
+			<div className="rounded-full bg-muted p-6 mb-4">
+				<ShoppingCart className="w-12 h-12 text-muted-foreground" />
+			</div>
+			<h3 className="text-lg font-semibold mb-2">Carrinho vazio</h3>
+			<p className="text-muted-foreground text-center max-w-sm">
+				Você ainda não adicionou nenhum produto ao seu carrinho.
+			</p>
+		</div>
+	);
+}
 
-	const hasOrder = order ? order?.items.length > 1 : false;
+export function ProductCardOrderList() {
+	const { order, loading } = useCheckout();
+
+	if (loading) {
+		return (
+			<>
+				{Array.from({ length: 4 }).map((_, i) => (
+					<ProductCardOrderSkeleton key={i} />
+				))}
+			</>
+		);
+	}
+
+	if (!order?.items || order.items.length === 0) {
+		return <EmptyCart />;
+	}
 
 	return (
 		<>
-			{hasOrder &&
-				order?.items.map((item) => (
-					<ProductCardOrder
-						key={item.id}
-						itemId={item.id}
-						product={{
-							id: item.product.id,
-							name: item.product.name,
-							image: item.product.image,
-							description: item.product.description,
-							price: item.price,
-							quantity: item.quantity,
-						}}
-					/>
-				))}
-
-			{!hasOrder &&
-				Array.from({ length: 4 }).map((_, i) => (
-					<ProductCardOrderSkeleton key={i} />
-				))}
+			{order.items.map((item) => (
+				<ProductCardOrder
+					key={item.id}
+					itemId={item.id}
+					product={{
+						id: item.product.id,
+						name: item.product.name,
+						image: item.product.image,
+						description: item.product.description,
+						price: item.price,
+						quantity: item.quantity,
+					}}
+				/>
+			))}
 		</>
 	);
 }

@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/jwt';
 
 export async function middleware(request: NextRequest) {
-	const protectedRoutes = ['/api/order'];
+	const protectedRoutes = ['/api/order', '/api/payments'];
 
 	const isProtectedRoute = protectedRoutes.some((route) =>
 		request.nextUrl.pathname.startsWith(route),
@@ -50,5 +50,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ['/api/order/:path*'],
+	matcher: ['/api/order/:path*', '/api/payments/:path*'],
 };

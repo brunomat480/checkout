@@ -1,9 +1,14 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { BankSlipPayment } from '@/components/bank-slip-payment';
 import { CheckoutSteps } from '@/components/checkout-steps';
 import { CreditCardPayment } from '@/components/credit-card-payment';
 import { PaymentButtons } from '@/components/payment-buttons';
 import { PixPayment } from '@/components/pix-payment';
+
+export const metadata: Metadata = {
+	title: 'Pagamento',
+};
 
 interface PaymentSearchParams {
 	method?: 'pix' | 'credit_card' | 'bank_slip';
