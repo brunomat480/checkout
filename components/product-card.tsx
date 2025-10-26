@@ -1,16 +1,15 @@
 'use client';
 
-import { LoaderCircle, ShoppingCart, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useTransition } from 'react';
-import { toast } from 'sonner';
-import { createOrderAction } from '@/actions/order/create-order-action';
+
+import { AddProductOrderButton } from '@/components/add-product-order-button';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { useCheckout } from '@/hooks/use-checkout';
+
 import { formatPrice } from '@/utils/format-price';
 
 interface ProductCardProps {
@@ -26,38 +25,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-	const [isPending, startTransition] = useTransition();
-	const { addProductOrder } = useCheckout();
-
-	async function handleAddProductOrder(productId: number) {
-		startTransition(async () => {
-			try {
-				const response = await addProductOrder(productId);
-
-				if (!response.success) {
-					toast.error(response?.error, {
-						position: 'bottom-right',
-					});
-
-					return;
-				}
-
-				toast.success(`${product.name} foi adicionado ao carrinho`, {
-					position: 'bottom-right',
-				});
-			} catch {
-				toast.error('Erro ao adicionar produto ao carrinho', {
-					position: 'bottom-right',
-				});
-			}
-		});
-	}
-
 	return (
 		<Card className="group overflow-hidden h-[28.125rem] border-0 shadow-sm hover:shadow-xl transition-all duration-300 py-0">
 			<div className="relative aspect-square overflow-hidden h-96 ">
 				<Image
-					src={product.image}
+					src={product.image || '/placeholder.svg'}
 					alt={product.name}
 					width={300}
 					height={300}
@@ -93,32 +65,18 @@ export function ProductCard({ product }: ProductCardProps) {
 					</Text>
 				</div>
 
-				<Button
-					size="sm"
-					disabled={isPending}
-					className="w-full h-9"
-					onClick={(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-						handleAddProductOrder(product.id);
+				<AddProductOrderButton
+					product={{
+						id: product.id,
+						name: product.name,
 					}}
-				>
-					{isPending ? (
-						<LoaderCircle className="animate-spin" />
-					) : (
-						<>
-							<ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-							Adicionar
-						</>
-					)}
-				</Button>
+				/>
 
 				<Button
 					asChild
-					size="sm"
-					disabled={isPending}
+					size="lg"
 					variant="outline"
-					className="w-full h-9"
+					className="w-full h-12"
 				>
 					<Link href={`/product/${product.id}`}>Detalhes</Link>
 				</Button>

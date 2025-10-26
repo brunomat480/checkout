@@ -132,6 +132,8 @@ export function PixPayment() {
 					position: 'top-right',
 				});
 
+				console.log('ID PAYMENT', responsepayOrder);
+
 				router.push(`/resume/payment/success/${responsepayOrder.payment?.id}`);
 			} catch (error) {
 				if (error instanceof HTTPError) {

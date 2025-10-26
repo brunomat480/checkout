@@ -11,6 +11,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AddProductOrderButton } from '@/components/add-product-order-button';
 import { ProductCard } from '@/components/product-card';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
@@ -142,15 +143,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
 						<Separator />
 
-						<div className="space-y-3">
-							<Button
-								size="lg"
-								className="w-full h-12 text-base"
-							>
-								<ShoppingCart className="h-5 w-5 mr-2" />
-								Adicionar ao Carrinho
-							</Button>
-						</div>
+						<AddProductOrderButton
+							product={{
+								id: product?.id,
+								name: product?.name,
+							}}
+						/>
 
 						<Separator />
 

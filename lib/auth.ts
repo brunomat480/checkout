@@ -1,66 +1,22 @@
-// import { cookies } from 'next/headers';
-// import { redirect } from 'next/navigation';
-// import { verifyToken } from './jwt';
-
-// // const TOKEN_NAME = 'd64a9d7049d31f6d43e12fb73617070e';
-
-// export async function setAuthToken(token: string) {
-// 	const cookieStore = await cookies();
-// 	cookieStore.set('auth-token', token, {
-// 		httpOnly: true,
-// 		secure: process.env.NODE_ENV === 'production',
-// 		sameSite: 'lax',
-// 		maxAge: 60 * 60 * 24 * 7,
-// 	});
-// }
-
-// export async function getAuthToken(): Promise<string | null> {
-// 	const cookieStore = await cookies();
-// 	return cookieStore.get('auth-token')?.value || null;
-// }
-
-// export async function removeAuthToken() {
-// 	const cookieStore = await cookies();
-// 	cookieStore.delete('auth-token');
-// }
-
-// export async function getCurrentUser(): Promise<any | null> {
-// 	try {
-// 		const token = await getAuthToken();
-// 		if (!token) return null;
-
-// 		return verifyToken(token);
-// 	} catch {
-// 		return null;
-// 	}
-// }
-
-// export async function requireAuth(): Promise<any> {
-// 	const user = await getCurrentUser();
-
-// 	if (!user) {
-// 		redirect('/sign-up');
-// 	}
-
-// 	return user;
-// }
-
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { verifyToken } from './jwt';
 
-// Opções do cookie auth-token
+export interface User {
+	id: string;
+	email: string;
+}
+
 export function getAuthCookieOptions() {
 	return {
 		httpOnly: true,
 		secure: process.env.NODE_ENV === 'production',
 		sameSite: 'lax' as const,
-		maxAge: 60 * 60 * 24 * 7, // 7 dias
+		maxAge: 60 * 60 * 24 * 7,
 		path: '/',
 	};
 }
 
-// Esta função é para usar em Server Components e Server Actions
 export async function setAuthToken(token: string) {
 	const cookieStore = await cookies();
 	cookieStore.set('auth-token', token, getAuthCookieOptions());
@@ -71,23 +27,32 @@ export async function getAuthToken(): Promise<string | null> {
 	return cookieStore.get('auth-token')?.value || null;
 }
 
-export async function removeAuthToken() {
+export async function removeAuthToken(): Promise<{
+	success: boolean;
+	message: string;
+}> {
 	const cookieStore = await cookies();
 	cookieStore.delete('auth-token');
+
+	return {
+		success: true,
+		message: 'Token de autenticação removido com sucesso',
+	};
 }
 
-export async function getCurrentUser(): Promise<any | null> {
+export async function getCurrentUser(): Promise<User | null> {
 	try {
 		const token = await getAuthToken();
 		if (!token) return null;
 
-		return verifyToken(token);
+		const decoded = await verifyToken(token);
+		return decoded as User;
 	} catch {
 		return null;
 	}
 }
 
-export async function requireAuth(): Promise<any> {
+export async function requireAuth(): Promise<User> {
 	const user = await getCurrentUser();
 
 	if (!user) {

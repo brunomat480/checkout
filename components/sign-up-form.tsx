@@ -8,7 +8,6 @@ import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type z from 'zod';
-import { createAccountAction } from '@/actions/create-account-action';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -26,6 +25,7 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/hooks/use-auth';
 import { signUpSchema } from '@/schemas/sign-up-schema';
 import { delay } from '@/utils/delay';
 
@@ -33,6 +33,8 @@ type SignUpType = z.infer<typeof signUpSchema>;
 
 export function SignUpForm() {
 	const router = useRouter();
+
+	const { login } = useAuth();
 
 	const [isPending, startTransition] = useTransition();
 	const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +53,7 @@ export function SignUpForm() {
 		startTransition(async () => {
 			await delay();
 			try {
-				const result = await createAccountAction({ name, email, password });
+				const result = await login({ name, email, password });
 
 				if (result.success) {
 					toast.success(result?.message, {

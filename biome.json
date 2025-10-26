@@ -30,7 +30,8 @@
 				"useConst": "off"
 			},
 			"correctness": {
-				"useParseIntRadix": "off"
+				"useParseIntRadix": "off",
+				"useExhaustiveDependencies": "off"
 			}
 		}
 	},

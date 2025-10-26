@@ -1,4 +1,8 @@
+'use client';
+
 import { ChevronDown, LogOut, User } from 'lucide-react';
+import { toast } from 'sonner';
+import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -8,8 +12,27 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/use-auth';
 
 export function AccountMenu() {
+	const { user, logout } = useAuth();
+
+	async function handleLogout() {
+		const userLogout = await logout();
+
+		if (!userLogout.success) {
+			toast.error('Erro ao tentar sair da conta', {
+				position: 'top-right',
+			});
+
+			return;
+		}
+
+		toast.success('Você saiu da conta', {
+			position: 'top-right',
+		});
+	}
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -19,11 +42,13 @@ export function AccountMenu() {
 				>
 					<User className="h-5 w-5" />
 					<div className="hidden lg:flex flex-col items-start">
-						<span className="text-xs text-muted-foreground">Olá, Bruno</span>
-						<span className="text-sm font-medium flex items-center gap-1">
+						<Text
+							variant="sm"
+							className="font-medium flex items-center gap-1"
+						>
 							Minha Conta
 							<ChevronDown className="h-3 w-3" />
-						</span>
+						</Text>
 					</div>
 				</Button>
 			</DropdownMenuTrigger>
@@ -33,9 +58,8 @@ export function AccountMenu() {
 				className="w-56"
 			>
 				<DropdownMenuLabel className="flex flex-col">
-					<span>Bruno</span>
 					<span className="text-xs font-normal text-muted-foreground">
-						teste@email.com
+						{user?.email}
 					</span>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
@@ -47,6 +71,7 @@ export function AccountMenu() {
 				>
 					<button
 						type="button"
+						onClick={handleLogout}
 						className="w-full"
 					>
 						<LogOut className="mr-2 h-4 w-4" />

@@ -87,6 +87,5 @@ export async function createPayment({
 			json: body,
 		})
 		.json();
-	console.log('SERVICE', response);
 	return response;
 }

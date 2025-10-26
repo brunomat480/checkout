@@ -86,7 +86,9 @@ export default async function SuccessPage({
 										<Text variant="sm">Data do pedido</Text>
 									</div>
 									<span className="font-semibold">
-										{dateFormatter.format(new Date(payment?.createdAt || ''))}
+										{payment?.createdAt
+											? dateFormatter.format(new Date(payment.createdAt))
+											: 'Data não disponível'}
 									</span>
 								</div>
 

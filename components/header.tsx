@@ -18,11 +18,13 @@ import {
 	SheetTrigger,
 } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/hooks/use-auth';
 import { useCheckout } from '@/hooks/use-checkout';
 
 export function Header() {
 	const path = usePathname();
 
+	const { status } = useAuth();
 	const { totalItens, loading } = useCheckout();
 
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -145,29 +147,42 @@ export function Header() {
 					</Button>
 
 					<div className="flex items-center gap-1 md:gap-2">
-						<AccountMenu />
+						{status === 'authenticated' && <AccountMenu />}
+						{status === 'unauthenticated' && (
+							<Button
+								asChild
+								size="lg"
+							>
+								<Link href="/sign-up">
+									<User />
+									Entrar
+								</Link>
+							</Button>
+						)}
 
-						<Button
-							asChild
-							variant="ghost"
-							size="icon"
-							className="relative"
-						>
-							<Link href="/resume">
-								<ShoppingCart className="h-5 w-5" />
-								{loading && (
-									<Skeleton className="absolute -top-1 -right-1 h-5 w-5 rounded-full" />
-								)}
-								{!loading && (
-									<Badge
-										variant="destructive"
-										className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-									>
-										{totalItens}
-									</Badge>
-								)}
-							</Link>
-						</Button>
+						{status === 'authenticated' && (
+							<Button
+								asChild
+								variant="ghost"
+								size="icon"
+								className="relative"
+							>
+								<Link href="/resume">
+									<ShoppingCart className="h-5 w-5" />
+									{loading && (
+										<Skeleton className="absolute -top-1 -right-1 h-5 w-5 rounded-full" />
+									)}
+									{!loading && (
+										<Badge
+											variant="destructive"
+											className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+										>
+											{totalItens}
+										</Badge>
+									)}
+								</Link>
+							</Button>
+						)}
 					</div>
 				</nav>
 

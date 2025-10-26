@@ -4,23 +4,41 @@ import { NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/jwt';
 
 export async function middleware(request: NextRequest) {
-	const protectedRoutes = ['/api/order', '/api/payments'];
+	const { pathname } = request.nextUrl;
 
-	const isProtectedRoute = protectedRoutes.some((route) =>
-		request.nextUrl.pathname.startsWith(route),
+	const protectedApiRoutes = ['/api/order', '/api/payments'];
+	const isProtectedApiRoute = protectedApiRoutes.some((route) =>
+		pathname.startsWith(route),
 	);
 
-	if (!isProtectedRoute) {
+	const isProtectedPage = pathname.startsWith('/resume');
+
+	if (!isProtectedApiRoute && !isProtectedPage) {
 		return NextResponse.next();
 	}
 
-	const authHeader = request.headers.get('authorization');
+	let token: string | undefined | null;
 
-	const token = authHeader?.startsWith('Bearer ')
-		? authHeader.substring(7)
-		: authHeader;
+	if (isProtectedPage) {
+		token = request.cookies.get('auth-token')?.value;
+	}
+
+	if (isProtectedApiRoute) {
+		const authHeader = request.headers.get('authorization');
+		token = authHeader?.startsWith('Bearer ')
+			? authHeader.substring(7)
+			: authHeader;
+
+		if (!token) {
+			token = request.cookies.get('auth-token')?.value;
+		}
+	}
 
 	if (!token) {
+		if (isProtectedPage) {
+			return NextResponse.redirect(new URL('/sign-up', request.url));
+		}
+
 		return NextResponse.json(
 			{ error: 'Token de autenticação necessário' },
 			{ status: 401 },
@@ -40,15 +58,24 @@ export async function middleware(request: NextRequest) {
 			},
 		});
 	} catch (error) {
+		if (isProtectedPage) {
+			return NextResponse.redirect(new URL('/sign-up', request.url));
+		}
+
 		if (error instanceof HTTPError) {
 			return NextResponse.json(
 				{ error: `Token inválido: ${error.message}` },
 				{ status: 401 },
 			);
 		}
+
+		return NextResponse.json(
+			{ error: 'Token inválido ou expirado' },
+			{ status: 401 },
+		);
 	}
 }
 
 export const config = {
-	matcher: ['/api/order/:path*', '/api/payments/:path*'],
+	matcher: ['/api/order/:path*', '/api/payments/:path*', '/resume/:path*'],
 };

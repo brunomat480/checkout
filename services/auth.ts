@@ -1,12 +1,12 @@
 import { api } from '@/lib/api';
 
-interface Auth {
+export interface Auth {
 	name: string;
 	email: string;
 	password: string;
 }
 
-interface AuthResponse {
+export interface AuthResponse {
 	success: boolean;
 	message?: string;
 	error?: string;
