@@ -5,7 +5,10 @@
 	"scripts": {
 		"dev": "next dev --turbopack",
 		"build": "next build --turbopack",
-		"start": "next start"
+		"start": "next start",
+		"db:migrate": "prisma migrate dev",
+		"db:studio": "prisma studio",
+		"db:seed": "prisma db seed"
 	},
 	"prisma": {
 		"seed": "ts-node prisma/seed.ts"
