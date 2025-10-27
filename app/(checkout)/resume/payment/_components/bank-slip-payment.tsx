@@ -22,7 +22,7 @@ import { delay } from '@/utils/delay';
 export function BankSlipPayment() {
 	const router = useRouter();
 
-	const { order } = useCheckout();
+	const { order, refreshOrder } = useCheckout();
 
 	const [boletoCode, setBoletoCode] = useState<string | undefined>('');
 	const [boletoGenerated, setBoletoGenerated] = useState(false);
@@ -101,6 +101,8 @@ export function BankSlipPayment() {
 					});
 					return;
 				}
+
+				await refreshOrder();
 
 				toast.success('Pagamento realizado com sucesso!', {
 					position: 'top-right',

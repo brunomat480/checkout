@@ -1,4 +1,3 @@
-import { HTTPError } from 'ky';
 import type { Metadata } from 'next';
 import { ProductCard } from '@/app/(app)/(home)/_components/product-card';
 import { Text } from '@/components/text';

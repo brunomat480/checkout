@@ -5,9 +5,15 @@ import { getAuthCookieOptions } from '@/lib/auth';
 import { generateToken } from '@/lib/jwt';
 import { prisma } from '@/lib/prisma';
 
+interface RequestBody {
+	name?: string;
+	email: string;
+	password: string;
+}
+
 export async function POST(request: NextRequest) {
 	try {
-		const { name, email, password } = await request.json();
+		const { name, email, password } = (await request.json()) as RequestBody;
 
 		if (!email || !password) {
 			return NextResponse.json(
@@ -83,8 +89,13 @@ export async function POST(request: NextRequest) {
 		response.cookies.set('auth-token', token, cookieOptions);
 
 		return response;
-	} catch (error: any) {
-		if (error.code === 'P2002') {
+	} catch (error: unknown) {
+		if (
+			typeof error === 'object' &&
+			error !== null &&
+			'code' in error &&
+			error.code === 'P2002'
+		) {
 			return NextResponse.json(
 				{ error: 'Email já está em uso' },
 				{ status: 400 },

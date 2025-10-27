@@ -61,9 +61,10 @@ function EmptyCart() {
 }
 
 export function ProductCardOrderList() {
-	const { order, loading } = useCheckout();
+	const { order, initialLoading } = useCheckout();
 
-	if (loading) {
+	// Só mostra o skeleton durante o carregamento inicial
+	if (initialLoading) {
 		return (
 			<>
 				{Array.from({ length: 4 }).map((_, i) => (

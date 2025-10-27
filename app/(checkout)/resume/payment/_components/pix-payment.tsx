@@ -23,7 +23,7 @@ import { delay } from '@/utils/delay';
 export function PixPayment() {
 	const router = useRouter();
 
-	const { order } = useCheckout();
+	const { order, refreshOrder } = useCheckout();
 
 	const [timeLeft, setTimeLeft] = useState(10 * 60);
 	const [pixCode, setPixCode] = useState<string | undefined>('');
@@ -130,6 +130,8 @@ export function PixPayment() {
 					});
 					return;
 				}
+
+				await refreshOrder();
 
 				toast.success('Pagamento realizado com sucesso!', {
 					position: 'top-right',

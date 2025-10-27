@@ -1,7 +1,6 @@
 'use client';
 
 import { Minus, Plus, Trash2 } from 'lucide-react';
-import Image from 'next/image';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { ProductImage } from '@/components/product-image';
@@ -33,8 +32,11 @@ export function ProductCardOrder({
 	const { addProductOrder, deleteItemOrder } = useCheckout();
 	const [isPending, startTransition] = useTransition();
 	const [isRemoving, setIsRemoving] = useState(false);
+	const [isUpdating, setIsUpdating] = useState(false);
 
 	async function handleIncrement() {
+		setIsUpdating(true);
+
 		startTransition(async () => {
 			try {
 				const response = await addProductOrder(product.id, 1);
@@ -43,6 +45,7 @@ export function ProductCardOrder({
 					toast.error(response?.error || 'Erro ao atualizar quantidade', {
 						position: 'top-right',
 					});
+					setIsUpdating(false);
 					return;
 				}
 
@@ -51,12 +54,17 @@ export function ProductCardOrder({
 				toast.error('Erro ao atualizar quantidade', {
 					position: 'top-right',
 				});
+				setIsUpdating(false);
+			} finally {
+				setIsUpdating(false);
 			}
 		});
 	}
 
 	async function handleDecrement() {
 		if (product.quantity <= 1) return;
+
+		setIsUpdating(true);
 
 		startTransition(async () => {
 			try {
@@ -66,6 +74,7 @@ export function ProductCardOrder({
 					toast.error(response?.error || 'Erro ao atualizar quantidade', {
 						position: 'top-right',
 					});
+					setIsUpdating(false);
 					return;
 				}
 
@@ -74,6 +83,9 @@ export function ProductCardOrder({
 				toast.error('Erro ao atualizar quantidade', {
 					position: 'top-right',
 				});
+				setIsUpdating(false);
+			} finally {
+				setIsUpdating(false);
 			}
 		});
 	}
@@ -107,10 +119,12 @@ export function ProductCardOrder({
 		});
 	}
 
+	const isProcessing = isRemoving || isUpdating;
+
 	return (
 		<div
-			className={`flex items-start gap-4 py-6 border-b border-border/40 last:border-0 transition-opacity ${
-				isRemoving ? 'opacity-50' : 'opacity-100'
+			className={`flex items-start gap-4 py-6 border-b border-border/40 last:border-0 transition-opacity duration-300 ${
+				isProcessing ? 'opacity-50' : 'opacity-100'
 			}`}
 		>
 			<div className="flex-shrink-0 overflow-hidden rounded-lg border border-border/50">
@@ -146,7 +160,7 @@ export function ProductCardOrder({
 						size="icon"
 						className="text-muted-foreground hover:text-destructive transition-colors"
 						onClick={handleRemove}
-						disabled={isPending || isRemoving}
+						disabled={isPending || isRemoving || isUpdating}
 					>
 						<Trash2 className="h-4 w-4" />
 					</Button>
@@ -158,7 +172,7 @@ export function ProductCardOrder({
 						size="icon"
 						className="h-8 w-8 bg-transparent hover:bg-accent"
 						onClick={handleDecrement}
-						disabled={isPending || product.quantity <= 1 || isRemoving}
+						disabled={isPending || product.quantity <= 1 || isProcessing}
 					>
 						<Minus className="h-3 w-3" />
 					</Button>
@@ -173,7 +187,7 @@ export function ProductCardOrder({
 						size="icon"
 						className="h-8 w-8 bg-transparent hover:bg-accent"
 						onClick={handleIncrement}
-						disabled={isPending || isRemoving}
+						disabled={isPending || isProcessing}
 					>
 						<Plus className="h-3 w-3" />
 					</Button>

@@ -1,4 +1,5 @@
 import { OrderStatus, PaymentMethod, PaymentStatus } from '@prisma/client';
+import { HTTPError } from 'ky';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
@@ -8,6 +9,53 @@ const paymentTypeMap = {
 	bank_slip: PaymentMethod.BANK_SLIP,
 	credit_card: PaymentMethod.CREDIT_CARD,
 };
+
+interface PaymentRequest {
+	orderId: string;
+	type: keyof typeof paymentTypeMap;
+	card?: {
+		credit_card: string;
+		name: string;
+		month: string;
+		year: string;
+		cvv: string;
+		installments: string;
+		brand?: string;
+	};
+}
+
+interface PaymentResult {
+	success: boolean;
+	response?: {
+		success: boolean;
+		payment: unknown;
+		message: string;
+		cancelled_previous_payments: number;
+	};
+	error?: string;
+}
+
+interface CreditCardProcessingResult {
+	success: boolean;
+	transactionId?: string;
+	authorizationCode?: string;
+	error?: string;
+}
+
+interface OrderWithItems {
+	id: number;
+	userId: number;
+	status: OrderStatus;
+	totalAmount: number;
+	items: Array<{
+		product: {
+			id: number;
+			name: string;
+			price: number;
+		};
+		quantity: number;
+	}>;
+}
 
 export async function POST(request: NextRequest) {
 	try {
@@ -20,7 +68,7 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		const { orderId, type, card } = await request.json();
+		const { orderId, type, card } = (await request.json()) as PaymentRequest;
 
 		if (!orderId || !type) {
 			return NextResponse.json(
@@ -100,7 +148,7 @@ export async function POST(request: NextRequest) {
 			},
 		});
 
-		let paymentResult: any;
+		let paymentResult: PaymentResult;
 
 		switch (type) {
 			case 'pix':
@@ -123,7 +171,7 @@ export async function POST(request: NextRequest) {
 				paymentResult = await processCreditCardPayment(
 					order,
 					currentUser.userId,
-					card,
+					card!,
 					existingPendingPayments,
 				);
 				break;
@@ -140,16 +188,28 @@ export async function POST(request: NextRequest) {
 		}
 
 		return NextResponse.json(paymentResult.response);
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error creating payment:', error);
+
+		if (error instanceof HTTPError) {
+			return NextResponse.json(
+				{ error: `Erro HTTP: ${error.message}` },
+				{ status: error.response.status },
+			);
+		}
+
+		const errorMessage =
+			error instanceof Error ? error.message : 'Erro desconhecido';
 		return NextResponse.json(
-			{ error: 'Erro ao criar pagamento: ' + error.message },
+			{ error: 'Erro ao criar pagamento: ' + errorMessage },
 			{ status: 500 },
 		);
 	}
 }
 
-async function cancelPreviousPendingPayments(pendingPayments: any[]) {
+async function cancelPreviousPendingPayments(
+	pendingPayments: Array<{ id: number }>,
+) {
 	if (pendingPayments.length === 0) return;
 
 	try {
@@ -170,10 +230,10 @@ async function cancelPreviousPendingPayments(pendingPayments: any[]) {
 }
 
 async function createPixPayment(
-	order: any,
+	order: OrderWithItems,
 	userId: string,
-	previousPayments: any[],
-) {
+	previousPayments: Array<{ id: number }>,
+): Promise<PaymentResult> {
 	try {
 		await cancelPreviousPendingPayments(previousPayments);
 
@@ -220,17 +280,17 @@ async function createPixPayment(
 		};
 
 		return { success: true, response };
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error creating PIX payment:', error);
 		return { success: false, error: 'Erro ao criar pagamento PIX' };
 	}
 }
 
 async function createBankSlipPayment(
-	order: any,
+	order: OrderWithItems,
 	userId: string,
-	previousPayments: any[],
-) {
+	previousPayments: Array<{ id: number }>,
+): Promise<PaymentResult> {
 	try {
 		await cancelPreviousPendingPayments(previousPayments);
 
@@ -277,18 +337,18 @@ async function createBankSlipPayment(
 		};
 
 		return { success: true, response };
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error creating bank slip payment:', error);
 		return { success: false, error: 'Erro ao criar pagamento com boleto' };
 	}
 }
 
 async function processCreditCardPayment(
-	order: any,
+	order: OrderWithItems,
 	userId: string,
-	card: any,
-	previousPayments: any[],
-) {
+	card: NonNullable<PaymentRequest['card']>,
+	previousPayments: Array<{ id: number }>,
+): Promise<PaymentResult> {
 	try {
 		if (
 			!card.credit_card ||
@@ -365,7 +425,7 @@ async function processCreditCardPayment(
 		};
 
 		return { success: true, response };
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error processing credit card payment:', error);
 		return { success: false, error: 'Erro ao processar pagamento com cartão' };
 	}
@@ -381,7 +441,10 @@ function generateBankSlipCode(paymentId: number, amount: number): string {
 	return `23793.38128 60000.000000 00000.000000 0 ${paymentId.toString().padStart(8, '0')} ${amountFormatted}`;
 }
 
-async function simulateCreditCardProcessing(card: any, amount: number) {
+async function simulateCreditCardProcessing(
+	card: NonNullable<PaymentRequest['card']>,
+	amount: number,
+): Promise<CreditCardProcessingResult> {
 	await new Promise((resolve) => setTimeout(resolve, 2000));
 
 	const cleanNumber = card.credit_card.replace(/\s/g, '');
@@ -463,7 +526,10 @@ export async function GET(request: NextRequest) {
 		const { searchParams } = new URL(request.url);
 		const orderId = searchParams.get('orderId');
 
-		const whereClause: any = {
+		const whereClause: {
+			userId: number;
+			orderId?: number;
+		} = {
 			userId: parseInt(currentUser.userId),
 		};
 
@@ -526,8 +592,16 @@ export async function GET(request: NextRequest) {
 			success: true,
 			payments: formattedPayments,
 		});
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error fetching payments:', error);
+
+		if (error instanceof HTTPError) {
+			return NextResponse.json(
+				{ error: `Erro HTTP: ${error.message}` },
+				{ status: error.response.status },
+			);
+		}
+
 		return NextResponse.json(
 			{ error: 'Erro ao buscar pagamentos' },
 			{ status: 500 },

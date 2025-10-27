@@ -5,6 +5,48 @@ import { getCurrentUserFromRequest } from '@/lib/auth-utils';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
 
+interface AddItemRequestBody {
+	productId: string;
+	quantity?: number;
+}
+
+interface OrderItemResponse {
+	id: number;
+	productId: number;
+	productName: string;
+	quantity: number;
+	price: number;
+	subtotal: number;
+}
+
+type OrderItemUpdateWithProduct = Awaited<
+	ReturnType<typeof prisma.orderItem.update>
+> & {
+	product: {
+		id: number;
+		name: string;
+		price: number;
+		image: string | null;
+		category: string;
+		description: string | null;
+		rating: number | null;
+	};
+};
+
+type OrderItemCreateWithProduct = Awaited<
+	ReturnType<typeof prisma.orderItem.create>
+> & {
+	product: {
+		id: number;
+		name: string;
+		price: number;
+		image: string | null;
+		category: string;
+		description: string | null;
+		rating: number | null;
+	};
+};
+
 export async function GET(request: NextRequest) {
 	try {
 		const currentUser = await getCurrentUser();
@@ -107,13 +149,19 @@ export async function GET(request: NextRequest) {
 			order: newOrder,
 			message: 'Novo carrinho criado',
 		});
-	} catch (error) {
+	} catch (error: unknown) {
 		if (error instanceof HTTPError) {
 			return NextResponse.json(
 				{ error: `Erro interno do servidor: ${error.message}` },
 				{ status: 500 },
 			);
 		}
+
+		console.error('Erro interno do servidor:', error);
+		return NextResponse.json(
+			{ error: 'Erro interno do servidor' },
+			{ status: 500 },
+		);
 	}
 }
 
@@ -129,7 +177,8 @@ export async function POST(request: NextRequest) {
 		}
 
 		const userId = parseInt(currentUser.userId);
-		const { productId, quantity = 1 } = await request.json();
+		const { productId, quantity = 1 } =
+			(await request.json()) as AddItemRequestBody;
 
 		if (!productId) {
 			return NextResponse.json(
@@ -219,11 +268,11 @@ export async function POST(request: NextRequest) {
 			},
 		});
 
-		let orderItem: any;
-		let message: any;
+		let orderItem: OrderItemUpdateWithProduct | OrderItemCreateWithProduct;
+		let message: string;
 
 		if (existingItem) {
-			orderItem = await prisma.orderItem.update({
+			orderItem = (await prisma.orderItem.update({
 				where: {
 					id: existingItem.id,
 				},
@@ -234,10 +283,10 @@ export async function POST(request: NextRequest) {
 				include: {
 					product: true,
 				},
-			});
+			})) as OrderItemUpdateWithProduct;
 			message = `Quantidade atualizada para ${orderItem.quantity} unidades`;
 		} else {
-			orderItem = await prisma.orderItem.create({
+			orderItem = (await prisma.orderItem.create({
 				data: {
 					orderId: order.id,
 					productId: product.id,
@@ -247,7 +296,7 @@ export async function POST(request: NextRequest) {
 				include: {
 					product: true,
 				},
-			});
+			})) as OrderItemCreateWithProduct;
 			message = 'Item adicionado ao carrinho';
 		}
 
@@ -298,46 +347,54 @@ export async function POST(request: NextRequest) {
 			},
 		});
 
+		const itemResponse: OrderItemResponse = {
+			id: orderItem.id,
+			productId: orderItem.productId,
+			productName: orderItem.product.name,
+			quantity: orderItem.quantity,
+			price: orderItem.price,
+			subtotal: orderItem.product.price * orderItem.quantity,
+		};
+
 		return NextResponse.json(
 			{
 				success: true,
 				order: updatedOrder,
-				item: {
-					id: orderItem.id,
-					productId: orderItem.productId,
-					productName: orderItem.product.name,
-					quantity: orderItem.quantity,
-					price: orderItem.price,
-					subtotal: orderItem.product.price * orderItem.quantity,
-				},
+				item: itemResponse,
 				message: message,
 			},
 			{ status: 200 },
 		);
-	} catch (error: any) {
-		if (error.code === 'P2002') {
-			return NextResponse.json(
-				{ error: 'Item já existe no carrinho' },
-				{ status: 409 },
-			);
+	} catch (error: unknown) {
+		if (typeof error === 'object' && error !== null && 'code' in error) {
+			const prismaError = error as { code: string };
+
+			if (prismaError.code === 'P2002') {
+				return NextResponse.json(
+					{ error: 'Item já existe no carrinho' },
+					{ status: 409 },
+				);
+			}
+
+			if (prismaError.code === 'P2025') {
+				return NextResponse.json(
+					{ error: 'Produto ou pedido não encontrado' },
+					{ status: 404 },
+				);
+			}
+
+			if (prismaError.code === 'P2003') {
+				return NextResponse.json(
+					{ error: 'Produto não existe' },
+					{ status: 404 },
+				);
+			}
 		}
 
-		if (error.code === 'P2025') {
-			return NextResponse.json(
-				{ error: 'Produto ou pedido não encontrado' },
-				{ status: 404 },
-			);
-		}
-
-		if (error.code === 'P2003') {
-			return NextResponse.json(
-				{ error: 'Produto não existe' },
-				{ status: 404 },
-			);
-		}
-
+		const errorMessage =
+			error instanceof Error ? error.message : 'Erro desconhecido';
 		return NextResponse.json(
-			{ error: `Erro interno ao adicionar item ao carrinho: ${error.message}` },
+			{ error: `Erro interno ao adicionar item ao carrinho: ${errorMessage}` },
 			{ status: 500 },
 		);
 	}
@@ -401,7 +458,7 @@ export async function DELETE(request: NextRequest) {
 		}
 
 		let message = '';
-		let updatedOrder: any;
+		let updatedOrder: Awaited<ReturnType<typeof prisma.order.update>>;
 
 		if (quantityToRemove) {
 			const removeQuantity = parseInt(quantityToRemove);
@@ -488,18 +545,24 @@ export async function DELETE(request: NextRequest) {
 			order: updatedOrder,
 			message: message,
 		});
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error removing item from order:', error);
 
-		if (error.code === 'P2025') {
-			return NextResponse.json(
-				{ error: 'Item não encontrado' },
-				{ status: 404 },
-			);
+		if (typeof error === 'object' && error !== null && 'code' in error) {
+			const prismaError = error as { code: string };
+
+			if (prismaError.code === 'P2025') {
+				return NextResponse.json(
+					{ error: 'Item não encontrado' },
+					{ status: 404 },
+				);
+			}
 		}
 
+		const errorMessage =
+			error instanceof Error ? error.message : 'Erro desconhecido';
 		return NextResponse.json(
-			{ error: `Erro ao remover item do carrinho: ${error.message}` },
+			{ error: `Erro ao remover item do carrinho: ${errorMessage}` },
 			{ status: 500 },
 		);
 	}

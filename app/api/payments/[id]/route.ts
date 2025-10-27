@@ -1,7 +1,53 @@
 import { OrderStatus, PaymentMethod, PaymentStatus } from '@prisma/client';
+import { HTTPError } from 'ky';
 import { type NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
+
+interface FormattedPayment {
+	id: number;
+	orderId: number;
+	userId: number;
+	paymentMethod: PaymentMethod;
+	paymentStatus: PaymentStatus;
+	amount: number;
+	installments: number | null;
+	createdAt: Date;
+	updatedAt: Date;
+	expiresAt: Date | null;
+	paidAt: Date | null;
+	refundedAt: Date | null;
+	order: {
+		id: number;
+		orderNumber: string | null;
+		status: OrderStatus;
+		totalAmount: number;
+		createdAt: Date;
+	};
+	user: {
+		id: number;
+		name: string | null;
+		email: string;
+	};
+	pix?: {
+		code: string | null;
+		qrCode: string | null;
+		qrCodeImage: string | null;
+	};
+	bankSlip?: {
+		code: string | null;
+		url: string | null;
+		barcodeImage: string | null;
+	};
+	creditCard?: {
+		lastFour: string | null;
+		brand: string | null;
+		installments: number;
+	};
+	processor?: unknown;
+	failureReason?: string | null;
+	externalId?: string | null;
+}
 
 export async function GET(
 	_request: NextRequest,
@@ -62,7 +108,7 @@ export async function GET(
 			);
 		}
 
-		let formattedPayment: any = {
+		const formattedPayment: FormattedPayment = {
 			id: payment.id,
 			orderId: payment.orderId,
 			userId: payment.userId,
@@ -75,8 +121,18 @@ export async function GET(
 			expiresAt: payment.expiresAt,
 			paidAt: payment.paidAt,
 			refundedAt: payment.refundedAt,
-			order: payment.order,
-			user: payment.user,
+			order: {
+				id: payment.order.id,
+				orderNumber: payment.order.orderNumber,
+				status: payment.order.status,
+				totalAmount: payment.order.totalAmount,
+				createdAt: payment.order.createdAt,
+			},
+			user: {
+				id: payment.user.id,
+				name: payment.user.name,
+				email: payment.user.email,
+			},
 		};
 
 		switch (payment.paymentMethod) {
@@ -100,7 +156,7 @@ export async function GET(
 				formattedPayment.creditCard = {
 					lastFour: payment.cardLastFour,
 					brand: payment.cardBrand,
-					installments: payment.installments,
+					installments: payment.installments || 1,
 				};
 				break;
 		}
@@ -123,20 +179,33 @@ export async function GET(
 			success: true,
 			payment: formattedPayment,
 		});
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error('Error fetching payment:', error);
 
-		if (error.code === 'P2025') {
+		if (error instanceof HTTPError) {
 			return NextResponse.json(
-				{ error: 'Pagamento não encontrado' },
-				{ status: 404 },
+				{ error: `Erro HTTP: ${error.message}` },
+				{ status: error.response.status },
 			);
 		}
 
+		if (typeof error === 'object' && error !== null && 'code' in error) {
+			const prismaError = error as { code: string };
+
+			if (prismaError.code === 'P2025') {
+				return NextResponse.json(
+					{ error: 'Pagamento não encontrado' },
+					{ status: 404 },
+				);
+			}
+		}
+
+		const errorMessage =
+			error instanceof Error ? error.message : 'Erro desconhecido';
 		return NextResponse.json(
 			{
 				error: 'Erro ao buscar pagamento',
-				details: error.message,
+				details: errorMessage,
 			},
 			{ status: 500 },
 		);
@@ -167,7 +236,6 @@ export async function PUT(
 			);
 		}
 
-		// Buscar a order para pegar o totalAmount
 		const order = await prisma.order.findFirst({
 			where: {
 				id: orderId,
@@ -200,7 +268,6 @@ export async function PUT(
 			});
 		}
 
-		// Usar transaction para garantir que tudo acontece junto
 		const result = await prisma.$transaction(async (tx) => {
 			// Atualizar a order
 			const updatedOrder = await tx.order.update({
@@ -211,7 +278,6 @@ export async function PUT(
 				},
 			});
 
-			// Criar o pagamento
 			const payment = await tx.payment.create({
 				data: {
 					orderId: orderId,
@@ -244,20 +310,31 @@ export async function PUT(
 				paymentMethod: result.payment.paymentMethod,
 			},
 		});
-	} catch (error: any) {
-		console.error('Error updating order status:', error);
-
-		if (error.code === 'P2025') {
+	} catch (error: unknown) {
+		if (error instanceof HTTPError) {
 			return NextResponse.json(
-				{ error: 'Pedido não encontrado' },
-				{ status: 404 },
+				{ error: `Erro HTTP: ${error.message}` },
+				{ status: error.response.status },
 			);
 		}
 
+		if (typeof error === 'object' && error !== null && 'code' in error) {
+			const prismaError = error as { code: string };
+
+			if (prismaError.code === 'P2025') {
+				return NextResponse.json(
+					{ error: 'Pedido não encontrado' },
+					{ status: 404 },
+				);
+			}
+		}
+
+		const errorMessage =
+			error instanceof Error ? error.message : 'Erro desconhecido';
 		return NextResponse.json(
 			{
 				error: 'Erro ao atualizar status do pedido',
-				details: error.message,
+				details: errorMessage,
 			},
 			{ status: 500 },
 		);

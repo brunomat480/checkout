@@ -1,7 +1,6 @@
 'use client';
 
 import { CircleCheck, Lock } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,14 @@ import { formatPrice } from '@/utils/format-price';
 export function ResumeCard() {
 	const router = useRouter();
 	const { order, loading } = useCheckout();
+
+	const shippingCost = 15;
+	const discountPercentage = 30;
+
+	const subtotal = order?.subtotal || 0;
+	const discountAmount = (subtotal * discountPercentage) / 100;
+
+	const totalAmount = subtotal + shippingCost - discountAmount;
 
 	const hasItems = order ? order?.items.length > 0 : false;
 
@@ -80,18 +87,18 @@ export function ResumeCard() {
 				<div className="space-y-4">
 					<div className="flex items-center justify-between text-sm">
 						<Text variant="muted">Subtotal</Text>
-						<Text>{formatPrice(order?.subtotal || 0)}</Text>
+						<Text>{formatPrice(subtotal)}</Text>
 					</div>
 
 					<div className="flex items-center justify-between text-sm">
 						<Text variant="muted">Frete</Text>
-						<Text>{formatPrice(order?.shipping || 0)}</Text>
+						<Text>{formatPrice(shippingCost)}</Text>
 					</div>
 
 					<div className="flex items-center justify-between text-sm">
-						<Text variant="muted">Desconto</Text>
+						<Text variant="muted">Desconto ({discountPercentage}%)</Text>
 						<Text className="text-green-600">
-							- {formatPrice(order?.discount || 0)}
+							- {formatPrice(discountAmount)}
 						</Text>
 					</div>
 
@@ -99,9 +106,7 @@ export function ResumeCard() {
 
 					<div className="flex items-center justify-between">
 						<Text variant="heading">Total</Text>
-						<Text variant="subtitle">
-							{formatPrice(order?.totalAmount || 0)}
-						</Text>
+						<Text variant="subtitle">{formatPrice(totalAmount)}</Text>
 					</div>
 				</div>
 

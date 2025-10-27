@@ -15,13 +15,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
-import {
 	Form,
 	FormControl,
 	FormField,
@@ -31,7 +24,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/use-auth';
-// import { auth } from '@/services/auth';
 import { delay } from '@/utils/delay';
 
 const signUpSchema = z.object({
@@ -122,122 +114,114 @@ export function SignUpFormModal({
 					<span className="sr-only">Fechar</span>
 				</Button>
 
-				<AlertDialogHeader>
-					<AlertDialogTitle className="sr-only">
-						Criar nova conta
+				<AlertDialogHeader className="space-y-2">
+					<AlertDialogTitle className="text-2xl font-semibold">
+						Criar conta
 					</AlertDialogTitle>
-					<AlertDialogDescription className="sr-only">
-						Formulário de cadastro de nova conta
+					<AlertDialogDescription>
+						Preencha todos campos para criar conta
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 
-				<Card className="w-full border-0 shadow-none">
-					<CardHeader>
-						<CardTitle>Criar conta</CardTitle>
-						<CardDescription>
-							Preencha todos campos para criar conta
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<Form {...form}>
-							<form onSubmit={form.handleSubmit(handleCreateAccount)}>
-								<div className="flex flex-col gap-6">
-									<div className="grid gap-2">
-										<FormLabel>Nome</FormLabel>
-										<FormField
-											name="name"
-											control={form.control}
-											render={({ field }) => (
-												<FormItem>
-													<FormControl>
-														<Input
-															type="text"
-															placeholder="Seu nome"
-															disabled={isPending}
-															{...field}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									<div className="grid gap-2">
-										<FormLabel>Email</FormLabel>
-										<FormField
-											name="email"
-											control={form.control}
-											render={({ field }) => (
-												<FormItem>
-													<FormControl>
-														<Input
-															type="email"
-															placeholder="email@example.com"
-															disabled={isPending}
-															{...field}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
-
-									<div className="grid gap-2">
-										<FormLabel>Senha</FormLabel>
-										<FormField
-											name="password"
-											control={form.control}
-											render={({ field }) => (
-												<FormItem>
-													<FormControl>
-														<div className="relative">
-															<Input
-																type={showPassword ? 'text' : 'password'}
-																placeholder="Sua senha"
-																disabled={isPending}
-																{...field}
-															/>
-															<Button
-																type="button"
-																variant="ghost"
-																size="icon"
-																onClick={handleViewPassword}
-																className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-																disabled={isPending}
-															>
-																{showPassword ? (
-																	<EyeOff className="h-4 w-4" />
-																) : (
-																	<Eye className="h-4 w-4" />
-																)}
-															</Button>
-														</div>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-									</div>
+				<div className="mt-4">
+					<Form {...form}>
+						<form onSubmit={form.handleSubmit(handleCreateAccount)}>
+							<div className="flex flex-col gap-4">
+								<div className="grid gap-2">
+									<FormLabel>Nome</FormLabel>
+									<FormField
+										name="name"
+										control={form.control}
+										render={({ field }) => (
+											<FormItem>
+												<FormControl>
+													<Input
+														type="text"
+														placeholder="Seu nome"
+														disabled={isPending}
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 								</div>
 
-								<Button
-									type="submit"
-									size="lg"
-									className="w-full mt-8"
-									disabled={isPending}
-								>
-									{isPending ? (
-										<LoaderCircle className="animate-spin" />
-									) : (
-										'Criar conta'
-									)}
-								</Button>
-							</form>
-						</Form>
-					</CardContent>
-				</Card>
+								<div className="grid gap-2">
+									<FormLabel>Email</FormLabel>
+									<FormField
+										name="email"
+										control={form.control}
+										render={({ field }) => (
+											<FormItem>
+												<FormControl>
+													<Input
+														type="email"
+														placeholder="email@example.com"
+														disabled={isPending}
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+
+								<div className="grid gap-2">
+									<FormLabel>Senha</FormLabel>
+									<FormField
+										name="password"
+										control={form.control}
+										render={({ field }) => (
+											<FormItem>
+												<FormControl>
+													<div className="relative">
+														<Input
+															type={showPassword ? 'text' : 'password'}
+															placeholder="Sua senha"
+															disabled={isPending}
+															{...field}
+														/>
+														<Button
+															type="button"
+															variant="ghost"
+															size="icon"
+															onClick={handleViewPassword}
+															className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+															disabled={isPending}
+														>
+															{showPassword ? (
+																<EyeOff className="h-4 w-4" />
+															) : (
+																<Eye className="h-4 w-4" />
+															)}
+														</Button>
+													</div>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</div>
+
+							<Button
+								type="submit"
+								size="lg"
+								className="w-full mt-6"
+								disabled={isPending}
+							>
+								{isPending ? (
+									<LoaderCircle className="animate-spin" />
+								) : (
+									'Criar conta'
+								)}
+							</Button>
+						</form>
+					</Form>
+				</div>
 			</AlertDialogContent>
 		</AlertDialog>
 	);

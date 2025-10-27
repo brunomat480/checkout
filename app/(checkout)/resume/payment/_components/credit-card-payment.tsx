@@ -45,7 +45,7 @@ export type CreditCardType = z.infer<typeof creditCardSchema>;
 export function CreditCardPayment() {
 	const router = useRouter();
 
-	const { order } = useCheckout();
+	const { order, refreshOrder } = useCheckout();
 	const [isFlipped, setIsFlipped] = useState(false);
 	const [isPending, startTransition] = useTransition();
 
@@ -125,6 +125,7 @@ export function CreditCardPayment() {
 					return;
 				}
 
+				await refreshOrder();
 				toast.success('Pagamento realizado com sucesso!', {
 					position: 'top-right',
 				});
