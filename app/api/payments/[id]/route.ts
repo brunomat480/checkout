@@ -269,7 +269,6 @@ export async function PUT(
 		}
 
 		const result = await prisma.$transaction(async (tx) => {
-			// Atualizar a order
 			const updatedOrder = await tx.order.update({
 				where: { id: orderId },
 				data: {

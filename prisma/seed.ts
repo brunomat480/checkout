@@ -16,7 +16,6 @@ async function main() {
 		'Mercado',
 	];
 
-	// Lista ampliada de produtos com imagens funcionais
 	const products = [
 		{
 			name: 'iPhone 15 Pro Max',

@@ -63,7 +63,6 @@ function EmptyCart() {
 export function ProductCardOrderList() {
 	const { order, initialLoading } = useCheckout();
 
-	// Só mostra o skeleton durante o carregamento inicial
 	if (initialLoading) {
 		return (
 			<>
