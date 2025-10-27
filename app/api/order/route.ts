@@ -23,12 +23,11 @@ export async function GET(request: NextRequest) {
 
 		const userId = parseInt(user.userId);
 
-		// 🔥 CORREÇÃO: Buscar por orders ATIVAS OU PENDENTES
 		const existingOrder = await prisma.order.findFirst({
 			where: {
 				userId: userId,
 				status: {
-					in: [OrderStatus.ACTIVE, OrderStatus.PENDING], // Busca tanto ativas quanto pendentes
+					in: [OrderStatus.ACTIVE, OrderStatus.PENDING],
 				},
 			},
 			include: {
@@ -52,11 +51,10 @@ export async function GET(request: NextRequest) {
 				},
 			},
 			orderBy: {
-				createdAt: 'desc', // Pega a mais recente
+				createdAt: 'desc',
 			},
 		});
 
-		// 🔥 CORREÇÃO: Se existe order (ativa ou pendente), retorna ela
 		if (existingOrder) {
 			return NextResponse.json({
 				success: true,
@@ -68,7 +66,6 @@ export async function GET(request: NextRequest) {
 			});
 		}
 
-		// 🔥 CORREÇÃO: Só cria nova order se não existir NENHUMA (ativa ou pendente)
 		const newOrder = await prisma.order.create({
 			data: {
 				userId: userId,
@@ -159,11 +156,12 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// 🔥 CORREÇÃO: Buscar por orders ATIVAS (não pendentes)
 		let order = await prisma.order.findFirst({
 			where: {
 				userId: userId,
-				status: OrderStatus.ACTIVE, // Só busca ativas para adicionar itens
+				status: {
+					in: [OrderStatus.ACTIVE, OrderStatus.PENDING],
+				},
 			},
 			include: {
 				items: {
@@ -174,27 +172,7 @@ export async function POST(request: NextRequest) {
 			},
 		});
 
-		// 🔥 CORREÇÃO: Se não tem order ativa, verifica se tem pendente
 		if (!order) {
-			const pendingOrder = await prisma.order.findFirst({
-				where: {
-					userId: userId,
-					status: OrderStatus.PENDING,
-				},
-			});
-
-			if (pendingOrder) {
-				return NextResponse.json(
-					{
-						error:
-							'Não é possível adicionar itens a um pedido com pagamento pendente',
-						orderId: pendingOrder.id,
-					},
-					{ status: 409 },
-				);
-			}
-
-			// Só cria nova order se não existir nenhuma (ativa ou pendente)
 			order = await prisma.order.create({
 				data: {
 					userId: userId,
@@ -215,6 +193,23 @@ export async function POST(request: NextRequest) {
 			});
 		}
 
+		if (order.status === OrderStatus.PENDING) {
+			order = await prisma.order.update({
+				where: { id: order.id },
+				data: {
+					status: OrderStatus.ACTIVE,
+					updatedAt: new Date(),
+				},
+				include: {
+					items: {
+						include: {
+							product: true,
+						},
+					},
+				},
+			});
+		}
+
 		const existingItem = await prisma.orderItem.findUnique({
 			where: {
 				order_product_unique: {
@@ -223,11 +218,6 @@ export async function POST(request: NextRequest) {
 				},
 			},
 		});
-
-		console.log(
-			'Item existente:',
-			existingItem ? `ID: ${existingItem.id}` : 'Nenhum',
-		);
 
 		let orderItem: any;
 		let message: any;
@@ -246,7 +236,6 @@ export async function POST(request: NextRequest) {
 				},
 			});
 			message = `Quantidade atualizada para ${orderItem.quantity} unidades`;
-			console.log('Item atualizado:', orderItem.id);
 		} else {
 			orderItem = await prisma.orderItem.create({
 				data: {
@@ -260,7 +249,6 @@ export async function POST(request: NextRequest) {
 				},
 			});
 			message = 'Item adicionado ao carrinho';
-			console.log('Novo item criado:', orderItem.id);
 		}
 
 		const allItems = await prisma.orderItem.findMany({
@@ -382,7 +370,6 @@ export async function DELETE(request: NextRequest) {
 				id: parseInt(itemId),
 				order: {
 					userId: parseInt(currentUser.userId),
-					status: OrderStatus.ACTIVE,
 				},
 			},
 			include: {
@@ -395,6 +382,21 @@ export async function DELETE(request: NextRequest) {
 			return NextResponse.json(
 				{ error: 'Item não encontrado no carrinho' },
 				{ status: 404 },
+			);
+		}
+
+		const allowedStatuses: OrderStatus[] = [
+			OrderStatus.ACTIVE,
+			OrderStatus.PENDING,
+			OrderStatus.PROCESSING,
+		];
+
+		if (!allowedStatuses.includes(orderItem.order.status)) {
+			return NextResponse.json(
+				{
+					error: `Não é possível modificar itens em um pedido com status ${orderItem.order.status}`,
+				},
+				{ status: 400 },
 			);
 		}
 

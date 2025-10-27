@@ -1,36 +1,11 @@
 import { cookies } from 'next/headers';
 import { api } from '@/lib/api';
-import type { Product } from '@/types/products';
+import type { Order } from '@/types/order';
 
 export interface OrderResponse {
 	success: boolean;
 	order: Order;
 	message: string;
-}
-
-export interface Order {
-	id: number;
-	userId: number;
-	status: string;
-	totalAmount: number;
-	subtotal: number;
-	shipping: number;
-	discount: number;
-	orderNumber: string;
-	createdAt: string;
-	updatedAt: string;
-	items: OrderItem[];
-}
-
-export interface OrderItem {
-	id: number;
-	orderId: number;
-	productId: number;
-	quantity: number;
-	price: number;
-	createdAt: string;
-	updatedAt: string;
-	product: Product;
 }
 
 export async function getOrder(): Promise<OrderResponse> {

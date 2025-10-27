@@ -5,22 +5,6 @@ export default function SuccessLoading() {
 	return (
 		<div className="min-h-screen bg-background p-8">
 			<div className="max-w-7xl mx-auto space-y-8">
-				<div className="flex items-center md:gap-8 gap-6 max-w-2xl mx-auto">
-					{['Produtos', 'Pagamento', 'Finalização'].map((step, index) => (
-						<div
-							key={step}
-							className="w-full"
-						>
-							<Skeleton className="h-4 w-16 mb-2 animate-pulse" />
-							<div className="bg-muted-foreground/20 w-full h-1 rounded-full">
-								<div
-									className={`h-1 rounded-full bg-muted-foreground/40 ${index === 2 ? 'w-full' : 'w-0'}`}
-								/>
-							</div>
-						</div>
-					))}
-				</div>
-
 				<div className="flex justify-center">
 					<Card className="max-w-2xl w-full border-0 shadow-lg">
 						<CardHeader className="text-center pb-6 space-y-4">
@@ -56,14 +40,6 @@ export default function SuccessLoading() {
 								<div className="flex items-center justify-between pt-2">
 									<Skeleton className="h-5 w-20" />
 									<Skeleton className="h-8 w-28" />
-								</div>
-							</div>
-
-							<div className="bg-blue-50/50 dark:bg-blue-950/10 border border-blue-200/50 dark:border-blue-900/30 rounded-xl p-5">
-								<div className="space-y-2.5">
-									<Skeleton className="h-3.5 w-full" />
-									<Skeleton className="h-3.5 w-full" />
-									<Skeleton className="h-3.5 w-2/3" />
 								</div>
 							</div>
 

@@ -26,7 +26,6 @@ export async function deleteItemOrder({
 	if (quantity > 0) {
 		searchParams.quantity = quantity.toString();
 	}
-
 	const response: DeleteOrderResponse = await api
 		.delete('order', {
 			headers: {

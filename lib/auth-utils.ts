@@ -6,7 +6,6 @@ export async function getCurrentUserFromRequest(request: NextRequest) {
 		const authHeader = request.headers.get('authorization');
 
 		if (!authHeader) {
-			console.log('Nenhum header authorization encontrado');
 			return null;
 		}
 

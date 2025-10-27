@@ -4,6 +4,7 @@ import { Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { ProductImage } from '@/components/product-image';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { useCheckout } from '@/hooks/use-checkout';
@@ -113,8 +114,8 @@ export function ProductCardOrder({
 			}`}
 		>
 			<div className="flex-shrink-0 overflow-hidden rounded-lg border border-border/50">
-				<Image
-					src={product?.image || ''}
+				<ProductImage
+					src={product?.image}
 					alt={product?.name || 'Produto'}
 					width={120}
 					height={120}
@@ -127,13 +128,13 @@ export function ProductCardOrder({
 					<div className="flex-1">
 						<Text
 							as="h3"
-							className="font-semibold text-foreground mb-1"
+							variant="heading"
+							className="text-foreground mb-1"
 						>
 							{product?.name}
 						</Text>
 						<Text
 							as="p"
-							variant="lg"
 							className="font-bold text-foreground"
 						>
 							{formatPrice(product.price * product.quantity)}
@@ -161,7 +162,10 @@ export function ProductCardOrder({
 					>
 						<Minus className="h-3 w-3" />
 					</Button>
-					<Text className="text-sm font-medium min-w-[2rem] text-center">
+					<Text
+						variant="small"
+						className="min-w-[2rem] text-center"
+					>
 						{product.quantity}
 					</Text>
 					<Button

@@ -1,40 +1,32 @@
 'use client';
 
 import { Star } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
-
 import { AddProductOrderButton } from '@/components/add-product-order-button';
+import { ProductImage } from '@/components/product-image';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-
+import type { Product } from '@/types/product';
 import { formatPrice } from '@/utils/format-price';
 
 interface ProductCardProps {
-	product: {
-		id: number;
-		image: string;
-		name: string;
-		category: string;
-		price: number;
-		rating: number;
-		description?: string;
-	};
+	product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
 	return (
 		<Card className="group overflow-hidden h-[28.125rem] border-0 shadow-sm hover:shadow-xl transition-all duration-300 py-0">
-			<div className="relative aspect-square overflow-hidden h-96 ">
-				<Image
-					src={product.image || '/placeholder.svg'}
-					alt={product.name}
+			<div className="relative object-top aspect-square overflow-hidden h-44 ">
+				<ProductImage
+					src={product.image}
+					alt={product?.name}
 					width={300}
 					height={300}
-					className="object-cover w-full h-96 group-hover:scale-125 transition-transform duration-500"
+					className="object-cover w-full h-44 group-hover:scale-125 transition-transform duration-500"
 				/>
+
 				<Badge
 					variant="secondary"
 					className="absolute top-2 left-2 text-[10px] px-2 py-0.5 h-auto bg-background/80 backdrop-blur-sm border-0"
@@ -78,7 +70,9 @@ export function ProductCard({ product }: ProductCardProps) {
 					variant="outline"
 					className="w-full h-12"
 				>
-					<Link href={`/product/${product.id}`}>Detalhes</Link>
+					<Link href={`/product/${product.id}`}>
+						<Text variant="small">Detalhes</Text>
+					</Link>
 				</Button>
 			</CardContent>
 		</Card>

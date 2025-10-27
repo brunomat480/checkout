@@ -5,18 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { AccountMenu } from '@/components/account-menu';
+import { SheetMenu } from '@/components/sheet-menu';
 import { Text } from '@/components/text';
 import { ThemeButton } from '@/components/theme/theme-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-	Sheet,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-	SheetTrigger,
-} from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
 import { useCheckout } from '@/hooks/use-checkout';
@@ -38,9 +32,9 @@ export function Header() {
 			<div className="px-4">
 				<div className="hidden md:flex items-center justify-between py-2 text-sm text-muted-foreground border-b">
 					<div className="flex items-center gap-6">
-						<Text variant="sm">Frete grátis acima de R$ 200</Text>
+						<Text variant="small">Frete grátis acima de R$ 200</Text>
 						<Text
-							variant="sm"
+							variant="small"
 							className="hidden lg:inline"
 						>
 							Parcele em até 12x sem juros
@@ -52,73 +46,16 @@ export function Header() {
 				</div>
 
 				<nav className="flex items-center justify-between py-3 md:py-4 gap-2 md:gap-8">
-					<Sheet>
-						<SheetTrigger asChild>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="md:hidden"
-							>
-								<Menu className="h-6 w-6" />
-							</Button>
-						</SheetTrigger>
-						<SheetContent side="left">
-							<SheetHeader>
-								<SheetTitle>Menu</SheetTitle>
-							</SheetHeader>
-							<div className="flex flex-col gap-4 mt-6 pl-3">
-								<div className="flex flex-col gap-2">
-									<Text className="text-sm font-medium">Conta</Text>
-									<Button
-										variant="ghost"
-										className="justify-start"
-									>
-										<User className="h-4 w-4 mr-2" />
-										Minha Conta
-									</Button>
-									<Button
-										variant="ghost"
-										className="justify-start"
-									>
-										Meus Pedidos
-									</Button>
-									<Button
-										variant="ghost"
-										className="justify-start"
-									>
-										Lista de Desejos
-									</Button>
-									<Button
-										variant="ghost"
-										className="justify-start"
-									>
-										Configurações
-									</Button>
-								</div>
-								<div className="border-t pt-4">
-									<ThemeButton />
-								</div>
-								<div className="border-t pt-4">
-									<Button
-										variant="ghost"
-										className="justify-start text-rose-500 dark:text-rose-400 w-full"
-									>
-										<LogOut className="h-4 w-4 mr-2" />
-										Sair
-									</Button>
-								</div>
-							</div>
-						</SheetContent>
-					</Sheet>
+					<SheetMenu />
 
-					<div className="flex items-center">
+					<Link href="/">
 						<Text
-							className="text-xl md:text-2xl font-bold bg-clip-text"
-							variant="xl"
+							variant="title"
+							className="select-none"
 						>
 							Logo
 						</Text>
-					</div>
+					</Link>
 
 					<form className="hidden md:flex flex-1 max-w-2xl mx-8">
 						<div className="relative flex items-center w-full">

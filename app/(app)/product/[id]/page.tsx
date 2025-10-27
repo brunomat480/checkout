@@ -1,24 +1,17 @@
 import { HTTPError } from 'ky';
-import {
-	ChevronLeft,
-	RotateCcw,
-	Shield,
-	ShoppingCart,
-	Star,
-	Truck,
-} from 'lucide-react';
+import { ChevronLeft, RotateCcw, Shield, Star, Truck } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AddProductOrderButton } from '@/components/add-product-order-button';
-import { ProductCard } from '@/components/product-card';
+import { ProductImage } from '@/components/product-image';
 import { Text } from '@/components/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { getProduct } from '@/services/get-product';
-import type { Product } from '@/types/products';
+import type { Product } from '@/types/product';
 import { delay } from '@/utils/delay';
 import { formatPrice } from '@/utils/format-price';
 
@@ -92,9 +85,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 				<div className="grid md:grid-cols-2 gap-8 mb-12">
 					<div className="space-y-4">
 						<div className="aspect-square rounded-lg overflow-hidden bg-muted">
-							<Image
-								src={product?.image || 'https://via.placeholder.com/150'}
-								alt={product?.name || ''}
+							<ProductImage
+								src={product?.image}
+								alt={product?.name || 'Produto'}
 								width={600}
 								height={600}
 								className="object-cover w-full h-full"
@@ -128,13 +121,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
 							<div>
 								<Text
 									as="h3"
-									className="font-semibold mb-2"
+									variant="subtitle"
 								>
 									Descrição
 								</Text>
 								<Text
 									as="p"
-									className="text-muted-foreground leading-relaxed"
+									variant="description"
 								>
 									{product?.description}
 								</Text>
@@ -156,16 +149,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 							<div className="flex items-start gap-3">
 								<Truck className="h-5 w-5 text-primary mt-0.5" />
 								<div>
+									<Text as="p">Frete Grátis</Text>
 									<Text
 										as="p"
-										className="font-medium"
-									>
-										Frete Grátis
-									</Text>
-									<Text
-										as="p"
-										variant="sm"
-										className="text-muted-foreground"
+										variant="small"
 									>
 										Para todo o Brasil em compras acima de R$ 199
 									</Text>
@@ -174,16 +161,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 							<div className="flex items-start gap-3">
 								<Shield className="h-5 w-5 text-primary mt-0.5" />
 								<div>
+									<Text as="p">Garantia de 1 ano</Text>
 									<Text
 										as="p"
-										className="font-medium"
-									>
-										Garantia de 1 ano
-									</Text>
-									<Text
-										as="p"
-										variant="sm"
-										className="text-muted-foreground"
+										variant="small"
 									>
 										Garantia oficial do fabricante
 									</Text>
@@ -192,16 +173,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
 							<div className="flex items-start gap-3">
 								<RotateCcw className="h-5 w-5 text-primary mt-0.5" />
 								<div>
+									<Text as="p">Devolução grátis</Text>
 									<Text
 										as="p"
-										className="font-medium"
-									>
-										Devolução grátis
-									</Text>
-									<Text
-										as="p"
-										variant="sm"
-										className="text-muted-foreground"
+										variant="small"
 									>
 										Até 30 dias após a compra
 									</Text>
@@ -210,26 +185,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
 						</div>
 					</div>
 				</div>
-
-				{/* {relatedProducts.length > 0 && (
-					<section>
-						<Text
-							as="h2"
-							variant="xl"
-							className="font-bold mb-6"
-						>
-							Produtos Relacionados
-						</Text>
-						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
-							{relatedProducts.map((relatedProduct) => (
-								<ProductCard
-									key={relatedProduct.id}
-									product={relatedProduct}
-								/>
-							))}
-						</div>
-					</section>
-				)} */}
 			</div>
 		</div>
 	);

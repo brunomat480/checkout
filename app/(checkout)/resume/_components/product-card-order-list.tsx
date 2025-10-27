@@ -1,7 +1,8 @@
 'use client';
 
 import { ShoppingCart } from 'lucide-react';
-import { ProductCardOrder } from '@/components/product-card-order';
+import { ProductCardOrder } from '@/app/(checkout)/resume/_components/product-card-order';
+import { Text } from '@/components/text';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCheckout } from '@/hooks/use-checkout';
 
@@ -41,10 +42,20 @@ function EmptyCart() {
 			<div className="rounded-full bg-muted p-6 mb-4">
 				<ShoppingCart className="w-12 h-12 text-muted-foreground" />
 			</div>
-			<h3 className="text-lg font-semibold mb-2">Carrinho vazio</h3>
-			<p className="text-muted-foreground text-center max-w-sm">
+			<Text
+				as="h3"
+				variant="subtitle"
+				className="mb-2"
+			>
+				Carrinho vazio
+			</Text>
+			<Text
+				as="p"
+				variant="description"
+				className="text-muted-foreground text-center max-w-sm"
+			>
 				Você ainda não adicionou nenhum produto ao seu carrinho.
-			</p>
+			</Text>
 		</div>
 	);
 }

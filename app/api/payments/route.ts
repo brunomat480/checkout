@@ -46,7 +46,6 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// 🔥 CORREÇÃO: Buscar a order e verificar se tem itens
 		const order = await prisma.order.findFirst({
 			where: {
 				id: parseInt(orderId),
@@ -71,7 +70,6 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// 🔥 CORREÇÃO CRÍTICA: Verificar se a order tem itens
 		if (!order.items || order.items.length === 0) {
 			return NextResponse.json(
 				{
@@ -83,7 +81,6 @@ export async function POST(request: NextRequest) {
 			);
 		}
 
-		// 🔥 CORREÇÃO: Verificar se o total do pedido é maior que zero
 		if (order.totalAmount <= 0) {
 			return NextResponse.json(
 				{
@@ -102,10 +99,6 @@ export async function POST(request: NextRequest) {
 				},
 			},
 		});
-
-		console.log(
-			`📄 Pagamentos pendentes encontrados: ${existingPendingPayments.length}`,
-		);
 
 		let paymentResult: any;
 
@@ -156,13 +149,8 @@ export async function POST(request: NextRequest) {
 	}
 }
 
-// 🔥 FUNÇÃO PARA CANCELAR PAGAMENTOS PENDENTES ANTERIORES
 async function cancelPreviousPendingPayments(pendingPayments: any[]) {
 	if (pendingPayments.length === 0) return;
-
-	console.log(
-		`🔄 Cancelando ${pendingPayments.length} pagamento(s) pendente(s) anterior(es)...`,
-	);
 
 	try {
 		await prisma.payment.updateMany({
@@ -176,9 +164,8 @@ async function cancelPreviousPendingPayments(pendingPayments: any[]) {
 				updatedAt: new Date(),
 			},
 		});
-		console.log('✅ Pagamentos anteriores cancelados com sucesso');
 	} catch (error) {
-		console.error('❌ Erro ao cancelar pagamentos anteriores:', error);
+		console.error('Erro ao cancelar pagamentos anteriores:', error);
 	}
 }
 
@@ -303,7 +290,6 @@ async function processCreditCardPayment(
 	previousPayments: any[],
 ) {
 	try {
-		// Validação dos campos do cartão conforme o schema
 		if (
 			!card.credit_card ||
 			!card.name ||
@@ -385,23 +371,19 @@ async function processCreditCardPayment(
 	}
 }
 
-// Função para gerar código PIX
 function generatePixCode(paymentId: number, amount: number): string {
 	const amountInCents = Math.round(amount * 100);
 	return `00020126580014br.gov.bcb.pix0136${paymentId}${Date.now()}52040000530398654${amountInCents.toString().padStart(2, '0')}${Math.random().toString(36).substring(2, 10)}6304`;
 }
 
-// Função para gerar código de boleto
 function generateBankSlipCode(paymentId: number, amount: number): string {
 	const amountFormatted = amount.toFixed(2).replace('.', '').padStart(10, '0');
 	return `23793.38128 60000.000000 00000.000000 0 ${paymentId.toString().padStart(8, '0')} ${amountFormatted}`;
 }
 
-// Função para simular processamento de cartão de crédito
 async function simulateCreditCardProcessing(card: any, amount: number) {
 	await new Promise((resolve) => setTimeout(resolve, 2000));
 
-	// Validação do número do cartão
 	const cleanNumber = card.credit_card.replace(/\s/g, '');
 	if (cleanNumber.length !== 16) {
 		return {
@@ -411,8 +393,7 @@ async function simulateCreditCardProcessing(card: any, amount: number) {
 		};
 	}
 
-	// Validação da data de validade
-	const currentYear = new Date().getFullYear() % 100; // Últimos 2 dígitos
+	const currentYear = new Date().getFullYear() % 100;
 	const currentMonth = new Date().getMonth() + 1;
 	const cardYear = parseInt(card.year);
 	const cardMonth = parseInt(card.month);
@@ -428,7 +409,6 @@ async function simulateCreditCardProcessing(card: any, amount: number) {
 		};
 	}
 
-	// Validação do CVV
 	if (!card.cvv || card.cvv.length !== 3) {
 		return {
 			success: false,
@@ -437,7 +417,6 @@ async function simulateCreditCardProcessing(card: any, amount: number) {
 		};
 	}
 
-	// Simulação de sucesso/falha (80% de sucesso)
 	const isSuccess = Math.random() > 0.2;
 
 	if (isSuccess) {
@@ -461,7 +440,6 @@ async function simulateCreditCardProcessing(card: any, amount: number) {
 	}
 }
 
-// Função para obter o tipo de pagamento a partir do método
 function getPaymentTypeFromMethod(method: PaymentMethod): string {
 	const reverseMap = {
 		[PaymentMethod.PIX]: 'pix',

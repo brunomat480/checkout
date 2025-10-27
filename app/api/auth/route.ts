@@ -9,8 +9,6 @@ export async function POST(request: NextRequest) {
 	try {
 		const { name, email, password } = await request.json();
 
-		console.log('📝 Request recebido:', { email, hasPassword: !!password });
-
 		if (!email || !password) {
 			return NextResponse.json(
 				{ error: 'Email e senha são obrigatórios' },
@@ -50,7 +48,6 @@ export async function POST(request: NextRequest) {
 				},
 			});
 			isNewUser = true;
-			console.log('✅ Novo usuário criado:', user.id);
 		} else {
 			const isPasswordValid = await compare(password, user.password);
 			if (!isPasswordValid) {
@@ -59,7 +56,6 @@ export async function POST(request: NextRequest) {
 					{ status: 401 },
 				);
 			}
-			console.log('✅ Login de usuário existente:', user.id);
 		}
 
 		const token = await generateToken({
@@ -67,12 +63,8 @@ export async function POST(request: NextRequest) {
 			email: user.email,
 		});
 
-		console.log('🔑 Token gerado:', token.substring(0, 20) + '...');
-
 		const cookieOptions = getAuthCookieOptions();
-		console.log('🍪 Opções do cookie:', cookieOptions);
 
-		// Criar a resposta
 		const response = NextResponse.json({
 			success: true,
 			user: {
@@ -88,19 +80,10 @@ export async function POST(request: NextRequest) {
 				: 'Login realizado com sucesso',
 		});
 
-		// Definir o cookie na resposta
 		response.cookies.set('auth-token', token, cookieOptions);
-
-		console.log('🍪 Cookie definido na resposta');
-		console.log(
-			'📤 Headers da resposta:',
-			Object.fromEntries(response.headers.entries()),
-		);
 
 		return response;
 	} catch (error: any) {
-		console.error('❌ Erro no handler:', error);
-
 		if (error.code === 'P2002') {
 			return NextResponse.json(
 				{ error: 'Email já está em uso' },

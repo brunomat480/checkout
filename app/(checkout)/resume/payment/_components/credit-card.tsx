@@ -1,5 +1,5 @@
 import { CreditCard } from 'lucide-react';
-import type { CreditCardType } from '@/components/credit-card-payment';
+import type { CreditCardType } from '@/app/(checkout)/resume/payment/_components/credit-card-payment';
 
 interface CreditCardProps {
 	isFlipped: boolean;

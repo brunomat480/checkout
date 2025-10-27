@@ -1,10 +1,10 @@
-import type { Product } from '@prisma/client';
 import { HTTPError } from 'ky';
 import type { Metadata } from 'next';
-import { ProductCard } from '@/components/product-card';
+import { ProductCard } from '@/app/(app)/(home)/_components/product-card';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { getProducts } from '@/services/get-products';
+import type { Product } from '@/types/product';
 import { delay } from '@/utils/delay';
 
 export const metadata: Metadata = {
@@ -19,10 +19,7 @@ export default async function HomePage() {
 		const productsResponse = await getProducts();
 
 		products = productsResponse.products as Product[];
-	} catch (error) {
-		if (error instanceof HTTPError) {
-			console.log(error.message);
-		}
+	} catch {
 		products = [];
 	}
 
@@ -109,7 +106,7 @@ export default async function HomePage() {
 				<section>
 					<Text
 						as="h2"
-						variant="xl"
+						variant="title"
 						className="mb-4"
 					>
 						Todos os Produtos

@@ -3,12 +3,12 @@ import { Calendar, CheckCircle, CreditCard, Package } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { CheckoutSteps } from '@/components/checkout-steps';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { getPayment, type Payment } from '@/services/get-payment';
+import { getPayment } from '@/services/get-payment';
+import type { Payment } from '@/types/payment';
 import { delay } from '@/utils/delay';
 import { formatPrice } from '@/utils/format-price';
 
@@ -43,8 +43,6 @@ export default async function SuccessPage({
 	return (
 		<main className="min-h-screen bg-background p-8">
 			<div className="max-w-7xl mx-auto space-y-8">
-				<CheckoutSteps step="paid" />
-
 				<div className="flex justify-center">
 					<Card className="max-w-2xl w-full">
 						<CardHeader className="text-center pb-6">
@@ -55,8 +53,7 @@ export default async function SuccessPage({
 							</div>
 							<Text
 								as="h1"
-								variant="xl"
-								className="text-balance"
+								variant="title"
 							>
 								Pagamento confirmado!
 							</Text>
@@ -73,7 +70,7 @@ export default async function SuccessPage({
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
 										<Package className="h-5 w-5 text-muted-foreground" />
-										<Text variant="sm">Número do pedido</Text>
+										<Text variant="small">Número do pedido</Text>
 									</div>
 									<span className="font-semibold">{payment?.id}</span>
 								</div>
@@ -83,7 +80,7 @@ export default async function SuccessPage({
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
 										<Calendar className="h-5 w-5 text-muted-foreground" />
-										<Text variant="sm">Data do pedido</Text>
+										<Text variant="small">Data do pedido</Text>
 									</div>
 									<span className="font-semibold">
 										{payment?.createdAt
@@ -97,17 +94,17 @@ export default async function SuccessPage({
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-3">
 										<CreditCard className="h-5 w-5 text-muted-foreground" />
-										<Text variant="sm">Método de pagamento</Text>
+										<Text variant="small">Método de pagamento</Text>
 									</div>
-									<Text>{payment?.paymentMethod}</Text>
+									<Text>{paymentMethod(payment?.paymentMethod)}</Text>
 								</div>
 
 								<Separator />
 
 								<div className="flex items-center justify-between">
-									<Text variant="sm">Total pago</Text>
+									<Text variant="small">Total pago</Text>
 									<Text
-										variant="xl"
+										variant="heading"
 										className="text-primary"
 									>
 										{formatPrice(payment?.amount || 0)}
@@ -131,4 +128,17 @@ export default async function SuccessPage({
 			</div>
 		</main>
 	);
+}
+
+function paymentMethod(method: string | undefined) {
+	switch (method) {
+		case 'PIX':
+			return 'Pix';
+		case 'CREDIT_CARD':
+			return 'Cartão de crédito';
+		case 'BANK_SLIP':
+			return 'Boleto';
+		default:
+			return 'Não encontrado';
+	}
 }

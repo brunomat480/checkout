@@ -12,7 +12,7 @@ import { deleteItemOrderAction } from '@/actions/order/delete-item-order-action'
 import { getOrderAction } from '@/actions/order/get-order-action';
 import type { CreateOrderResponse } from '@/services/create-order';
 import type { DeleteOrderResponse } from '@/services/delete-item-order';
-import type { Order } from '@/services/get-order';
+import type { Order } from '@/types/order';
 import { delay } from '@/utils/delay';
 
 type CheckoutContextType = {

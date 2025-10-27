@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronDown, LogOut, User } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
@@ -43,8 +44,8 @@ export function AccountMenu() {
 					<User className="h-5 w-5" />
 					<div className="hidden lg:flex flex-col items-start">
 						<Text
-							variant="sm"
-							className="font-medium flex items-center gap-1"
+							variant="small"
+							className="flex items-center gap-1"
 						>
 							Minha Conta
 							<ChevronDown className="h-3 w-3" />
@@ -63,11 +64,16 @@ export function AccountMenu() {
 					</span>
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem>Meus Pedidos</DropdownMenuItem>
+				<DropdownMenuItem
+					asChild
+					className="cursor-pointer"
+				>
+					<Link href="/resume">Meus Pedidos</Link>
+				</DropdownMenuItem>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					asChild
-					className="text-rose-500 dark:text-rose-400"
+					className="text-rose-500 dark:text-rose-400 cursor-pointer"
 				>
 					<button
 						type="button"

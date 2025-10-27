@@ -1,18 +1,23 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import { createElement, type JSX, type ReactNode } from 'react';
 
-const textVariants = cva('font-sans text-foreground', {
+const textVariants = cva('font-sans', {
 	variants: {
 		variant: {
-			xl: 'text-xl leading-8 font-bold',
-			lg: 'text-lg leading-6',
-			base: 'text-base leading-6',
-			md: 'text-md leading-6',
-			sm: 'text-sm leading-6',
-			xs: 'text-xs leading-6',
+			title: 'text-2xl leading-8 font-bold text-foreground tracking-tight',
+			subtitle: 'text-xl leading-7 font-semibold text-foreground',
+			heading: 'text-lg leading-7 font-semibold text-foreground',
+			description: 'text-sm leading-5 text-muted-foreground',
+			body: 'text-base leading-6 text-foreground',
+			small: 'text-sm leading-5 text-foreground',
+			muted: 'text-sm leading-5 text-muted-foreground',
+			label:
+				'text-xs leading-4 font-medium text-foreground uppercase tracking-wider',
 		},
 	},
-	defaultVariants: { variant: 'base' },
+	defaultVariants: {
+		variant: 'body',
+	},
 });
 
 interface TextProps extends VariantProps<typeof textVariants> {

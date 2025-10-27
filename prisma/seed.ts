@@ -234,11 +234,8 @@ async function main() {
 		},
 	];
 
-	// Limpar dados existentes antes de inserir novos
 	await prisma.product.deleteMany();
-	console.log('🗑️ Produtos existentes removidos');
 
-	// Inserção com categorias aleatórias
 	for (const product of products) {
 		const category = categories[Math.floor(Math.random() * categories.length)];
 
@@ -249,11 +246,6 @@ async function main() {
 			},
 		});
 	}
-
-	console.log('✅ Seed concluído com sucesso!');
-	console.log(
-		`📦 ${products.length} produtos inseridos com imagens funcionais`,
-	);
 }
 
 main()

@@ -1,7 +1,8 @@
 'use server';
 
 import { HTTPError } from 'ky';
-import { getOrder, type Order } from '@/services/get-order';
+import { getOrder } from '@/services/get-order';
+import type { Order } from '@/types/order';
 
 export async function getOrderAction(): Promise<
 	Order | { success: boolean; error: string }

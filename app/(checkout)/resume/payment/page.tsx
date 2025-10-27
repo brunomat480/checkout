@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { BankSlipPayment } from '@/components/bank-slip-payment';
-import { CheckoutSteps } from '@/components/checkout-steps';
-import { CreditCardPayment } from '@/components/credit-card-payment';
-import { PaymentButtons } from '@/components/payment-buttons';
-import { PixPayment } from '@/components/pix-payment';
+import { BankSlipPayment } from '@/app/(checkout)/resume/payment/_components/bank-slip-payment';
+import { CreditCardPayment } from '@/app/(checkout)/resume/payment/_components/credit-card-payment';
+import { PaymentButtons } from '@/app/(checkout)/resume/payment/_components/payment-buttons';
+import { PixPayment } from '@/app/(checkout)/resume/payment/_components/pix-payment';
 
 export const metadata: Metadata = {
 	title: 'Pagamento',
@@ -28,8 +27,6 @@ export default async function PaymentPage({
 
 	return (
 		<div className="min-h-screen pb-4">
-			<CheckoutSteps step="processing" />
-
 			<div className="mt-14">
 				<PaymentButtons paymentMethod={method} />
 			</div>

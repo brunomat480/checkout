@@ -3,6 +3,7 @@
 import { CircleCheck, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -78,33 +79,29 @@ export function ResumeCard() {
 			<CardContent>
 				<div className="space-y-4">
 					<div className="flex items-center justify-between text-sm">
-						<span className="text-muted-foreground">Subtotal</span>
-						<span className="font-medium text-foreground">
-							{formatPrice(order?.subtotal || 0)}
-						</span>
+						<Text variant="muted">Subtotal</Text>
+						<Text>{formatPrice(order?.subtotal || 0)}</Text>
 					</div>
 
 					<div className="flex items-center justify-between text-sm">
-						<span className="text-muted-foreground">Frete</span>
-						<span className="font-medium text-foreground">
-							{formatPrice(order?.shipping || 0)}
-						</span>
+						<Text variant="muted">Frete</Text>
+						<Text>{formatPrice(order?.shipping || 0)}</Text>
 					</div>
 
 					<div className="flex items-center justify-between text-sm">
-						<span className="text-muted-foreground">Desconto</span>
-						<span className="font-medium text-green-600">
+						<Text variant="muted">Desconto</Text>
+						<Text className="text-green-600">
 							- {formatPrice(order?.discount || 0)}
-						</span>
+						</Text>
 					</div>
 
 					<Separator />
 
 					<div className="flex items-center justify-between">
-						<span className="text-base font-bold text-foreground">Total</span>
-						<span className="text-xl font-bold text-foreground">
+						<Text variant="heading">Total</Text>
+						<Text variant="subtitle">
 							{formatPrice(order?.totalAmount || 0)}
-						</span>
+						</Text>
 					</div>
 				</div>
 
@@ -118,13 +115,13 @@ export function ResumeCard() {
 				</Button>
 
 				<div className="mt-6 space-y-2">
-					<div className="flex items-start gap-2 text-xs text-muted-foreground">
-						<CircleCheck className="size-4" />
-						<span>Frete grátis acima de R$ 200</span>
+					<div className="flex items-start gap-2">
+						<CircleCheck className="size-4 text-muted-foreground" />
+						<Text variant="muted">Frete grátis acima de R$ 200</Text>
 					</div>
-					<div className="flex items-start gap-2 text-xs text-muted-foreground">
-						<Lock className="size-4" />
-						<span>Compra 100% segura</span>
+					<div className="flex items-start gap-2">
+						<Lock className="size-4 text-muted-foreground" />
+						<Text variant="muted">Compra 100% segura</Text>
 					</div>
 				</div>
 			</CardContent>

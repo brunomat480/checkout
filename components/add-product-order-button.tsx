@@ -4,6 +4,7 @@ import { LoaderCircle, ShoppingCart } from 'lucide-react';
 import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { SignUpFormModal } from '@/components/sign-up-form-modal';
+import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import { useCheckout } from '@/hooks/use-checkout';
@@ -79,7 +80,7 @@ export function AddProductOrderButton({ product }: AddProductOrderButtonProps) {
 				) : (
 					<>
 						<ShoppingCart className="h-5 w-5 mr-2" />
-						Adicionar ao Carrinho
+						<Text variant="small">Adicionar ao Carrinho</Text>
 					</>
 				)}
 			</Button>

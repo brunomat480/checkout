@@ -1,16 +1,15 @@
 'use client';
 
 import { HTTPError } from 'ky';
-import { Copy, LoaderCircle, QrCode, Zap } from 'lucide-react';
+import { Barcode, Copy, LoaderCircle, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { createPaymentAction } from '@/actions/payments/create-payment-action';
 import { payOrderAction } from '@/actions/payments/pay-order-action';
 import { Text } from '@/components/text';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import {
 	Tooltip,
 	TooltipContent,
@@ -18,46 +17,21 @@ import {
 	TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useCheckout } from '@/hooks/use-checkout';
+import { delay } from '@/utils/delay';
 
-export function PixPayment() {
+export function BankSlipPayment() {
 	const router = useRouter();
 
 	const { order } = useCheckout();
 
-	const [timeLeft, setTimeLeft] = useState(10 * 60);
-	const [pixCode, setPixCode] = useState<string | undefined>('');
-	const [qrCodeGenerated, setQrCodeGenerated] = useState(false);
+	const [boletoCode, setBoletoCode] = useState<string | undefined>('');
+	const [boletoGenerated, setBoletoGenerated] = useState(false);
 	const [isPending, startTransition] = useTransition();
 	const [isPayingPending, startPayingTransition] = useTransition();
 
-	const totalTime = 10 * 60;
-
-	useEffect(() => {
-		if (!qrCodeGenerated) return;
-
-		const timer = setInterval(() => {
-			setTimeLeft((prev) => {
-				if (prev <= 0) {
-					clearInterval(timer);
-					return 0;
-				}
-				return prev - 1;
-			});
-		}, 1000);
-
-		return () => clearInterval(timer);
-	}, [qrCodeGenerated]);
-
-	function formatTime(seconds: number) {
-		const mins = Math.floor(seconds / 60);
-		const secs = seconds % 60;
-		return `${mins}:${secs.toString().padStart(2, '0')}`;
-	}
-
-	const progressValue = ((totalTime - timeLeft) / totalTime) * 100;
-
 	async function handleCreatePayment() {
 		startTransition(async () => {
+			await delay();
 			if (!order?.id) {
 				toast.error('Pedido não encontrado', {
 					position: 'top-right',
@@ -68,14 +42,13 @@ export function PixPayment() {
 			try {
 				const response = await createPaymentAction({
 					orderId: order?.id,
-					type: 'pix',
+					type: 'bank_slip',
 				});
 
 				if (response?.payment) {
-					setPixCode(response?.payment?.qr_code_image);
-					setQrCodeGenerated(true);
-					setTimeLeft(10 * 60);
-					toast.success('QR Code gerado com sucesso!', {
+					setBoletoCode(response?.payment?.bank_slip_code);
+					setBoletoGenerated(true);
+					toast.success('Boleto gerado com sucesso!', {
 						position: 'top-right',
 					});
 
@@ -93,7 +66,7 @@ export function PixPayment() {
 						position: 'top-right',
 					});
 				} else {
-					toast.error('Erro ao gerar QR Code', {
+					toast.error('Erro ao gerar boleto, tente novamente!', {
 						position: 'top-right',
 					});
 				}
@@ -102,8 +75,8 @@ export function PixPayment() {
 	}
 
 	function handleCopyToClipboard() {
-		if (!pixCode) return;
-		navigator.clipboard.writeText(pixCode);
+		if (!boletoCode) return;
+		navigator.clipboard.writeText(boletoCode);
 		toast.success('Código copiado!', {
 			position: 'top-right',
 		});
@@ -111,6 +84,7 @@ export function PixPayment() {
 
 	async function handlePay() {
 		startPayingTransition(async () => {
+			await delay();
 			if (!order?.id) {
 				toast.error('Pedido não encontrado', {
 					position: 'top-right',
@@ -132,8 +106,6 @@ export function PixPayment() {
 					position: 'top-right',
 				});
 
-				console.log('ID PAYMENT', responsepayOrder);
-
 				router.push(`/resume/payment/success/${responsepayOrder.payment?.id}`);
 			} catch (error) {
 				if (error instanceof HTTPError) {
@@ -152,20 +124,20 @@ export function PixPayment() {
 	return (
 		<Card className="max-w-2xl mx-auto">
 			<CardContent className="space-y-6">
-				{!qrCodeGenerated ? (
+				{!boletoGenerated ? (
 					<div className="text-center space-y-6 py-8">
 						<div className="space-y-2">
 							<Text
 								as="h3"
-								className="text-xl font-semibold"
+								variant="title"
 							>
-								Gerar QR Code PIX
+								Gerar Boleto Bancário
 							</Text>
 							<Text
 								as="p"
-								className="text-muted-foreground"
+								variant="description"
 							>
-								Clique no botão abaixo para gerar o código PIX do seu pedido
+								Clique no botão abaixo para gerar o boleto do seu pedido
 							</Text>
 						</div>
 
@@ -179,8 +151,8 @@ export function PixPayment() {
 								<LoaderCircle className="animate-spin" />
 							) : (
 								<>
-									<QrCode className="h-5 w-5" />
-									Gerar QR Code
+									<Barcode className="h-5 w-5" />
+									Gerar Boleto
 								</>
 							)}
 						</Button>
@@ -190,40 +162,28 @@ export function PixPayment() {
 						<div className="text-center space-y-2">
 							<Text
 								as="p"
-								className="text-muted-foreground"
+								variant="description"
 							>
-								Abra o app com sua chave PIX cadastrada, escolha{' '}
-								<span className="font-semibold text-foreground">
-									Pagar com Pix
-								</span>
+								Abra o app do seu banco, escolha <strong>Pagar Boleto</strong>
 							</Text>
 							<Text
 								as="p"
-								className="text-muted-foreground"
+								variant="description"
 							>
-								e escaneie o QR Code ou copie e cole o código.
+								e escaneie o código de barras ou copie e cole o código.
 							</Text>
 						</div>
 
-						<div className="bg-primary rounded-full size-40 flex items-center justify-center mx-auto">
-							<QrCode className="size-28 text-white" />
+						<div className="bg-primary rounded-lg p-8 flex items-center justify-center mx-auto">
+							<Barcode className="size-32 text-primary-foreground" />
 						</div>
 
-						<div className="space-y-2">
-							<Progress
-								value={progressValue}
-								className="h-2"
-							/>
+						<div className="text-center">
 							<Text
 								as="p"
-								variant="sm"
-								className="text-center text-muted-foreground"
+								variant="small"
 							>
-								Você tem{' '}
-								<span className="font-semibold text-foreground">
-									{formatTime(timeLeft)}
-								</span>{' '}
-								para pagar
+								Você tem <strong>3 dias</strong> para pagar
 							</Text>
 						</div>
 
@@ -262,7 +222,7 @@ export function PixPayment() {
 										</Button>
 									</TooltipTrigger>
 									<TooltipContent>
-										<p>Simula a confirmação do pagamento PIX</p>
+										<p>Simula a confirmação do pagamento do boleto</p>
 									</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>

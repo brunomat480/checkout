@@ -1,5 +1,5 @@
 import { api } from '@/lib/api';
-import type { Product } from '@/types/products';
+import type { Product } from '@/types/product';
 
 interface ProductsResponse {
 	products: Product[];

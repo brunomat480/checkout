@@ -4,13 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { HTTPError } from 'ky';
 import { LoaderCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import z from 'zod';
+import type z from 'zod';
 import { createPaymentAction } from '@/actions/payments/create-payment-action';
-import { CreditCardComponent } from '@/components/credit-card';
-import { Text } from '@/components/text';
+import { CreditCardComponent } from '@/app/(checkout)/resume/payment/_components/credit-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -34,23 +33,12 @@ import {
 	formatCreditCard,
 	formatOnlyNumbers,
 	unmaskCreditCard,
-	validateCreditCard,
 } from '@/lib/credit-card-utils';
+import { creditCardSchema } from '@/schemas/credit0card-schema';
+import { delay } from '@/utils/delay';
 
-const creditCardSchema = z.object({
-	credit_card: z
-		.string()
-		.min(1, 'Informe o número do cartão')
-		.refine(
-			(value) => validateCreditCard(unmaskCreditCard(value)),
-			'Número de cartão inválido',
-		),
-	name: z.string().min(1, 'Informe o nome impresso no cartão'),
-	month: z.string().min(2, 'Inválido').max(2, 'Inválido'),
-	year: z.string().min(2, 'Inválido').max(2, 'Inválido'),
-	cvv: z.string().min(3, '3 dígitos').max(3, '3 dígitos'),
-	installments: z.string().min(1, 'Selecione uma parcela'),
-});
+const MAX_INSTALLMENTS = 12;
+const MIN_INSTALLMENT_VALUE = 20.0;
 
 export type CreditCardType = z.infer<typeof creditCardSchema>;
 
@@ -74,6 +62,31 @@ export function CreditCardPayment() {
 		},
 	});
 
+	const installmentsOptions = useMemo(() => {
+		if (!order?.totalAmount) return [];
+
+		const totalAmount = order.totalAmount;
+		const options = [];
+
+		const maxPossibleInstallments = Math.floor(
+			totalAmount / MIN_INSTALLMENT_VALUE,
+		);
+		const availableInstallments = Math.min(
+			maxPossibleInstallments,
+			MAX_INSTALLMENTS,
+		);
+
+		for (let i = 1; i <= availableInstallments; i++) {
+			const installmentValue = totalAmount / i;
+			options.push({
+				value: i.toString(),
+				label: `${i}x de R$ ${installmentValue.toFixed(2).replace('.', ',')}`,
+			});
+		}
+
+		return options;
+	}, [order?.totalAmount]);
+
 	async function handleMakePayment({
 		credit_card,
 		cvv,
@@ -83,6 +96,7 @@ export function CreditCardPayment() {
 		year,
 	}: CreditCardType) {
 		startTransition(async () => {
+			await delay();
 			if (!order?.id) {
 				toast.error('Pedido não encontrado', {
 					position: 'top-right',
@@ -118,7 +132,7 @@ export function CreditCardPayment() {
 				router.push(`/resume/payment/success/${response.payment?.id}`);
 			} catch (error) {
 				if (error instanceof HTTPError) {
-					toast.error(error.message, {
+					toast.error('Erro ao realizar pagamento', {
 						position: 'top-right',
 					});
 				} else {
@@ -189,12 +203,7 @@ export function CreditCardPayment() {
 									</div>
 
 									<div className="mt-4">
-										<Text
-											variant="sm"
-											className="font-medium mb-2"
-										>
-											Validade
-										</Text>
+										<span className="font-medium text-sm mb-2">Validade</span>
 										<div className="flex items-start gap-6 flex-wrap md:flex-nowrap">
 											<div className="flex items-start gap-4">
 												<FormField
@@ -294,28 +303,18 @@ export function CreditCardPayment() {
 															>
 																<FormControl>
 																	<SelectTrigger className="w-full">
-																		<SelectValue />
+																		<SelectValue placeholder="Selecione as parcelas" />
 																	</SelectTrigger>
 																</FormControl>
 																<SelectContent>
-																	<SelectItem value="1">
-																		1x de R$ 100,00
-																	</SelectItem>
-																	<SelectItem value="2">
-																		2x de R$ 50,00
-																	</SelectItem>
-																	<SelectItem value="3">
-																		3x de R$ 33,33
-																	</SelectItem>
-																	<SelectItem value="4">
-																		4x de R$ 25,00
-																	</SelectItem>
-																	<SelectItem value="5">
-																		5x de R$ 20,00
-																	</SelectItem>
-																	<SelectItem value="6">
-																		6x de R$ 16,67
-																	</SelectItem>
+																	{installmentsOptions.map((option) => (
+																		<SelectItem
+																			key={option.value}
+																			value={option.value}
+																		>
+																			{option.label}
+																		</SelectItem>
+																	))}
 																</SelectContent>
 															</Select>
 															<FormMessage />
