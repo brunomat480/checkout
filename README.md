@@ -8,10 +8,6 @@ Instale as dependências:
 npm i
 ```
 
-Inicie a aplicação:
-```bash
-npm run dev
-```
 ##
 
 Execute as migrações:
@@ -27,6 +23,11 @@ npm run db:seed
 ```
 
 ##
+
+Inicie a aplicação:
+```bash
+npm run dev
+```
 
 #### Adicionais
 Interface de banco dados:
