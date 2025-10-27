@@ -6,7 +6,7 @@
 		"dev": "next dev --turbopack",
 		"build": "next build --turbopack",
 		"start": "next start",
-		"db:migrate": "prisma migrate dev",
+		"db:migrate": "prisma migrate dev --name create_tables",
 		"db:studio": "prisma studio",
 		"db:seed": "prisma db seed"
 	},
